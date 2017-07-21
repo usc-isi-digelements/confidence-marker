@@ -1,0 +1,26 @@
+{
+  "name": "confidence-marker",
+  "description": "A Polymer Element showing an marker that displays confidence and extraction information",
+  "version": "1.0.0",
+  "authors": ["Next Century Corporation"],
+  "license": "Apache-2.0",
+  "keywords": [
+    "web-component",
+    "polymer"
+  ],
+  "main": "confidence-marker.html",
+  "license": "http://polymer.github.io/LICENSE.txt",
+  "homepage": "https://github.com/DigElements/confidence-marker/",
+  "ignore": [
+    "/.*",
+    "/test/"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.7.0",
+    "paper-elements": "PolymerElements/paper-elements#^1.0.7",
+    "iron-elements": "PolymerElements/iron-elements#^1.0.10"
+  },
+  "devDependencies": {
+    "web-component-tester": "^5.0.0"
+  }
+}
