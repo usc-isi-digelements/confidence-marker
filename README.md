@@ -5,17 +5,17 @@ A Polymer Element showing an marker that displays confidence and extraction info
 ### Example
 ```js
 demo.extraction = {
-..confidence: 100,
-..provenance: [
-....0: {
-......method: 'method',
-......source: {
-........context: 'prevWord prevWord <etk> keyword </etk> postWord postWord',
-........document_id: 'document id',
-........segment:  'segment'
-......}
-....}
-..]
+  confidence: 100,
+  provenance: [
+    0: {
+      method: 'method',
+      source: {
+        context: 'prevWord prevWord <etk> keyword </etk> postWord postWord',
+        document_id: 'document id',
+        segment:  'segment'
+      }
+    }
+  ]
 }
 ```
 ```html
