@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="confidence-styles.html">
 
@@ -25,12 +24,9 @@ limitations under the License.
     <style include="confidence-styles"></style>
 
     <style>
-      etk {
+      .highlighted {
         font-weight: bold;
         background-color: yellow;
-      }
-      paper-dialog {
-        min-width: 700px;
       }
       .confidence {
         cursor: pointer;
@@ -59,10 +55,10 @@ limitations under the License.
           <div class="layout horizontal wrap">
             <template is="dom-repeat" items="[[_getContextTextSplit(item)]]">
               <span class="styled-dialog-right-space">
-                <template is="dom-if" if$="[[_hasEtk(item)]]">
-                  <etk>[[_stripEtkTag(item)]]</etk>
+                <template is="dom-if" if$="[[_hasHighlight(item)]]">
+                  <span class="highlighted">[[_stripTag(item)]]</span>
                 </template>
-                <template is="dom-if" if$="[[!_hasEtk(item)]]">
+                <template is="dom-if" if$="[[!_hasHighlight(item)]]">
                   [[item]]
                 </template>
               </span>
@@ -112,6 +108,18 @@ limitations under the License.
           value: function() {
             return ['source','segment'];
           }
+        },
+
+        extractionContextTextProperty: {
+          type: Array,
+          value: function() {
+            return ['source','context','text'];
+          }
+        },
+
+        highlightTag: {
+          type: String,
+          value: 'etk'
         }
       },
 
@@ -131,12 +139,11 @@ limitations under the License.
           propertyArray = [propertyArray];
         }
 
-        for(var i in propertyArray) {
+        propertyArray.forEach(function(field){
           if(curItem) {
-            var field = propertyArray[i];
             curItem = curItem[field];
           }
-        }
+        });
         return curItem || defaultValue;
       },
 
@@ -179,16 +186,16 @@ limitations under the License.
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
       /**
-       * Returns the provenance text as an array split so that etk tags are seperate from normal text.
+       * Returns the provenance text as an array split so that highlighted tags are seperate from normal text.
        *
        * @param {Object} item
        * @return {Array}
        * @private
        */
       _getContextTextSplit: function(item) {
-        if(item && item.source && item.source.context && item.source.context.text) {
-          var str = item.source.context.text;
-          var strPrep = str.replace(new RegExp('<etk', 'g') , '<splithere><etk').replace(new RegExp('</etk>', 'g') , '</etk><splithere>');
+        var str = this._getProperty(item, this.extractionContextTextProperty);
+        if(str) {
+          var strPrep = str.replace(new RegExp('<'+this.highlightTag, 'g') , '<splithere><'+this.highlightTag).replace(new RegExp('</'+this.highlightTag+'>', 'g') , '</'+this.highlightTag+'><splithere>');
           var strSplit = strPrep.split('<splithere>');
           return strSplit;
         }
@@ -196,27 +203,27 @@ limitations under the License.
       },
 
       /**
-       * Returns if the text contains etk tags
+       * Returns if the text contains highlighted tags
        *
        * @param {String} raw
        * @return {Boolean}
        * @private
        */
-      _hasEtk: function(raw) {
-        if(raw.indexOf('<etk') >= 0) {
+      _hasHighlight: function(raw) {
+        if(raw.indexOf('<'+this.highlightTag) >= 0) {
           return true;
         }
         return false;
       },
 
       /**
-       * Removes the '<etk>' and '</etk> tags from a string.
+       * Removes the highlighted tags from a string.
        *
        * @param {String} raw
        * @return {String}
        * @private
        */
-      _stripEtkTag: function(raw) {
+      _stripTag: function(raw) {
         var cut = raw.substring(raw.indexOf('>') + 1);
         cut = cut.substring(0,cut.indexOf('<'));
         return cut;
