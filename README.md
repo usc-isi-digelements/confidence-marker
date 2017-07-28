@@ -6,17 +6,16 @@ A Polymer Element showing an marker that displays confidence and extraction info
 ```js
 demo.extraction = {
   confidence: 100,
-  provenance: [
-    0: {
-      method: 'method',
-      source: {
-        context: 'prevWord prevWord <etk> keyword </etk> postWord postWord',
-        document_id: 'document id',
-        segment:  'segment'
-      }
+  provenance: [{
+    method: 'demoMethod',
+    source: {
+      context: {
+        text: '2before 1before <etk> highlighted text</etk> 1after 2after'
+      },
+      segment: 'demoSegmet'
     }
-  ]
-}
+  }]
+};
 ```
 ```html
 <confidence-marker
