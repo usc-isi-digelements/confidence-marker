@@ -19,27 +19,21 @@ limitations under the License.
 <link rel="import" href="confidence-styles.html">
 
 <!--
-A Polymer Element showing the confidence of an extraction property that opens a dialog with details of that property
+A Polymer Element showing the confidence of an extraction that opens a dialog with the provenance details of that extraction.
 
 ### Example
 ```js
-extraction = {
-  confidence: 100,
-  provenance: [{
-    method: 'demoMethod',
-    source: {
-      context: {
-        text: '2before 1before <etk> highlighted text</etk> 1after 2after'
-      },
-      segment: 'demoSegmet'
-    }
-  }]
-};
+var provenances = [{
+  method: 'html extraction',
+  text: 'the quick brown fox <etk>jumped</etk> over the lazy dog'
+}];
 ```
 
 ```html
 <confidence-marker
-  extraction=[[extraction]]>
+  confidence="100"
+  document-id="1234"
+  provenances="[[provenances]]">
 </confidence-marker>
 ```
 
@@ -52,6 +46,11 @@ extraction = {
     <style include="iron-flex iron-flex-alignment iron-flex-factors"></style>
 
     <style>
+      styled-dialog ::content .inside .styled-dialog-name {
+        display: inline-block;
+        /* Set the width to fit the "Document ID" text plus margin. */
+        min-width: 105px;
+      }
       .highlighted {
         font-weight: bold;
         background-color: yellow;
@@ -62,38 +61,35 @@ extraction = {
     </style>
 
     <div class="layout horizontal center extraction-item">
-      <template is="dom-if" if$="[[_getProperty(extraction, extractionDataConfidenceProperty)]]">
-        <span class$="confidence left [[_getConfidenceStyleClass(extraction, extractionDataConfidenceProperty)]]"
-          title$="[[_getTitle(extraction, extractionDataConfidenceProperty)]]"
-          on-tap="_toggleContextDialog"></span>
-        <span class$="confidence right [[_getConfidenceStyleClass(extraction, extractionDataConfidenceProperty)]]"
-          title$="[[_getTitle(extraction, extractionDataConfidenceProperty)]]"
-          on-tap="_toggleContextDialog"></span>
-      </template>
-      <styled-dialog id="contextDialog" header="Extraction Data Provenance" on-tap="_toggleContextDialog">
-        <template is="dom-if" if="[[!_getProperty(extraction, extractionDataProvenanceProperty)]]">
-          <div>Unavailable</div>
+      <span class$="confidence left [[_getConfidenceStyleClass(confidence)]]" title$="[[_getTitle(confidence)]]" on-tap="_toggleProvenanceDialog"></span>
+      <span class$="confidence right [[_getConfidenceStyleClass(confidence)]]" title$="[[_getTitle(confidence)]]" on-tap="_toggleProvenanceDialog"></span>
+
+      <styled-dialog id="provenanceDialog" header="Extraction Data Provenance" on-tap="_toggleProvenanceDialog">
+        <template is="dom-if" if="[[!provenances]]">
+          <div>None</div>
         </template>
-        <template is="dom-if" if="[[_getProperty(extraction, extractionDataProvenanceProperty)]]">
-          <div><strong class="styled-dialog-right-space">Document Id:</strong><span>[[_getContextID(extraction, extractionDataProvenanceProperty)]]</span></div>
+
+        <template is="dom-if" if="[[provenances]]">
+          <div><strong class="styled-dialog-name">Document ID</strong><span>[[documentId]]</span></div>
         </template>
-        <template is="dom-repeat" items="[[_getProperty(extraction, extractionDataProvenanceProperty)]]">
+
+        <template is="dom-repeat" items="[[provenances]]">
           <div class="styled-dialog-divider"></div>
-          <div><strong class="styled-dialog-right-space">Text:</strong></div>
           <div class="layout horizontal wrap">
-            <template is="dom-repeat" items="[[_getContextTextSplit(item)]]">
+            <strong class="styled-dialog-name">Text</strong>
+            <template is="dom-repeat" items="[[_getContextTextSplit(item, provenanceTextProperty, highlightTag)]]">
               <span class="styled-dialog-right-space">
-                <template is="dom-if" if$="[[_hasHighlight(item)]]">
-                  <span class="highlighted">[[_stripTag(item)]]</span>
+                <template is="dom-if" if$="[[_hasHighlight(item, highlightTag)]]">
+                  <span class="highlighted">[[_stripTag(item, highlightTag)]]</span>
                 </template>
-                <template is="dom-if" if$="[[!_hasHighlight(item)]]">
+                <template is="dom-if" if$="[[!_hasHighlight(item, highlightTag)]]">
                   [[item]]
                 </template>
               </span>
             </template>
           </div>
-          <div><strong class="styled-dialog-right-space">Method:</strong><span>[[_getProperty(item, extractionMethodProperty, 'Unavailable')]]</span></div>
-          <div><strong class="styled-dialog-right-space">Segment:</strong><span>[[_getProperty(item, extractionSegmentProperty, 'Unavailable')]]</span></div>
+
+          <div><strong class="styled-dialog-name">Method</strong><span>[[_getProperty(item, provenanceMethodProperty)]]</span></div>
         </template>
       </styled-dialog>
     </div>
@@ -106,45 +102,81 @@ extraction = {
       is: 'confidence-marker',
 
       properties: {
-        extraction: {
-          type: Object
+        /**
+         * (Required)
+         *
+         * The confidence.
+         *
+         * @type {Number|String}
+         * @default '0'
+         */
+        confidence: {
+          type: String,
+          value: '0'
         },
 
         /**
-         * The confidence property in the data objects from the extraction objects.  Supported confidence values are "high" and "low".
+         * (Optional)
+         *
+         * The document ID.
          *
          * @type {String}
-         * @default 'confidence'
+         * @default 'None'
          */
-        extractionDataConfidenceProperty: {
+        documentId: {
           type: String,
-          value: 'confidence'
+          value: 'None'
         },
 
-        extractionDataProvenanceProperty: {
+        /**
+         * (Optional)
+         *
+         * The list of extraction provenance objects.
+         *
+         * @type {Array}
+         * @default []
+         */
+        provenances: {
           type: String,
-          value: 'provenance'
+          value: function() {
+            return [];
+          }
         },
 
-        extractionMethodProperty: {
+        /**
+         * (Optional) 
+         *
+         * The property of the method in the provenance objects.
+         *
+         * @type {String}
+         * @default 'method'
+         */
+        provenanceMethodProperty: {
           type: String,
           value: 'method'
         },
 
-        extractionSegmentProperty: {
+        /**
+         * (Optional) 
+         *
+         * The property of the text in the provenance objects.
+         *
+         * @type {String}
+         * @default 'text'
+         */
+        provenanceTextProperty: {
           type: Array,
-          value: function() {
-            return ['source','segment'];
-          }
+          value: 'text'
         },
 
-        extractionContextTextProperty: {
-          type: Array,
-          value: function() {
-            return ['source','context','text'];
-          }
-        },
-
+        /**
+         * (Optional) 
+         *
+         * The highlight tag used in the provenance text.  Assumes the format:  `<highlightTag>text</highlightTag>`
+         *
+         * @type {String}
+         * @default 'etk'
+         */
         highlightTag: {
           type: String,
           value: 'etk'
@@ -159,59 +191,32 @@ extraction = {
        * @return {Object}
        * @private
        */
-      _getProperty: function(item, property, defaultValue) {
-        var curItem = item;
-        var propertyArray = property;
-
-        if(!Array.isArray(propertyArray)) {
-          propertyArray = [propertyArray];
-        }
-
-        propertyArray.forEach(function(field){
-          if(curItem) {
-            curItem = curItem[field];
-          }
-        });
-        return curItem || defaultValue;
+      _getProperty: function(item, property) {
+        return item[property];
       },
 
       /**
-       * Returns the title based on the given item at the given property.
+       * Returns the title based on the given confidence.
        *
-       * @param {Object} item
-       * @param {String} property
+       * @param {String} confidence
        * @return {String}
        * @private
        */
-      _getTitle: function(item, property) {
-        return 'Confidence:  ' + this._getProperty(item,property) + '% (Click to See Provenance)';
+      _getTitle: function(confidence) {
+        return 'Confidence:  ' + confidence + '% (Click to See Provenance)';
       },
 
       /**
-       * Opens the provenance context dialog.
+       * Opens the provenance dialog.
        *
        * @private
        */
-      _toggleContextDialog: function(e) {
-        e.stopPropagation();
-        this.$.contextDialog.open();
-      },
-
-      /**
-       * Returns the provenance document id based on the given item.
-       *
-       * @param {Object} item
-       * @return {String}
-       * @private
-       */
-      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-      _getContextID: function(item, property) {
-        if(item && item[property] && item[property][0] && item[property][0].source && item[property][0].source.document_id) {
-          return item[property][0].source.document_id;
+      _toggleProvenanceDialog: function(e) {
+        if(e) {
+          e.stopPropagation();
         }
-        return 'None';
+        this.$.provenanceDialog.open();
       },
-      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
       /**
        * Returns the provenance text as an array split so that highlighted tags are seperate from normal text.
@@ -220,65 +225,67 @@ extraction = {
        * @return {Array}
        * @private
        */
-      _getContextTextSplit: function(item) {
-        var str = this._getProperty(item, this.extractionContextTextProperty);
-        if(str) {
-          var strPrep = str.replace(new RegExp('<'+this.highlightTag, 'g') , '<splithere><'+this.highlightTag).replace(new RegExp('</'+this.highlightTag+'>', 'g') , '</'+this.highlightTag+'><splithere>');
-          var strSplit = strPrep.split('<splithere>');
-          return strSplit;
+      _getContextTextSplit: function(item, property, highlightTag) {
+        if(!item[property]) {
+          return ['None'];
         }
-        return ['Unavailable'];
+        // TODO Why do we need the <splithere> tags?
+        return item[property]
+          .replace(new RegExp('<' + highlightTag + '>', 'g') , '<splithere><' + highlightTag + '>')
+          .replace(new RegExp('</' + highlightTag + '>', 'g') , '</' + highlightTag+'><splithere>')
+          .split('<splithere>')
+          .filter(function(text) {
+            return !!text;
+          });
       },
 
       /**
-       * Returns if the text contains highlighted tags
+       * Returns if the text contains highlighted tags.
        *
        * @param {String} raw
+       * @param {String} highlightTag
        * @return {Boolean}
        * @private
        */
-      _hasHighlight: function(raw) {
-        if(raw.indexOf('<'+this.highlightTag) >= 0) {
-          return true;
-        }
-        return false;
+      _hasHighlight: function(raw, highlightTag) {
+        return (raw.indexOf('<' + highlightTag + '>') >= 0 && raw.indexOf('</' + highlightTag + '>') >= 0);
       },
 
       /**
        * Removes the highlighted tags from a string.
        *
        * @param {String} raw
+       * @param {String} highlightTag
        * @return {String}
        * @private
        */
-      _stripTag: function(raw) {
-        var cut = raw.substring(raw.indexOf('>') + 1);
-        cut = cut.substring(0,cut.indexOf('<'));
-        return cut;
+      _stripTag: function(raw, highlightTag) {
+        var cut = raw.substring(raw.indexOf('<' + highlightTag + '>') + highlightTag.length + 2);
+        return cut.substring(0, cut.indexOf('</' + highlightTag + '>')) || raw;
       },
 
       /**
-       * Returns the style class of the confidence icon using the given item and confidence property.
+       * Returns the style class of the confidence icon using the given confidence.
        *
-       * @param {Object} item
-       * @param {String} property
+       * @param {Number|String} confidence
        * @return {String}
        * @private
        */
-      _getConfidenceStyleClass: function(item, property) {
-        if(item[property] > 99) {
+      _getConfidenceStyleClass: function(confidence) {
+        var confidenceNumber = Number(confidence);
+        if(confidenceNumber > 99) {
           return 'full';
         }
-        if(item[property] > 66) {
+        if(confidenceNumber > 66) {
           return 'high';
         }
-        if(item[property] > 33) {
+        if(confidenceNumber > 33) {
           return 'med';
         }
-        if(item[property] > 0) {
+        if(confidenceNumber > 0) {
           return 'low';
         }
-        return item[property] === 0 ? 'no' : 'hide';
+        return (confidence === 0 || confidence === '0') ? 'no' : 'hide';
       }
     });
   })();

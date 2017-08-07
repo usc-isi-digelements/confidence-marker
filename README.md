@@ -1,25 +1,20 @@
 # confidence-marker
 
-A Polymer Element showing an marker that displays confidence and extraction information
+A Polymer Element showing the confidence of an extraction that opens a dialog with the provenance details of that extraction.
 
 ### Example
 ```js
-demo.extraction = {
-  confidence: 100,
-  provenance: [{
-    method: 'demoMethod',
-    source: {
-      context: {
-        text: '2before 1before <etk> highlighted text</etk> 1after 2after'
-      },
-      segment: 'demoSegmet'
-    }
-  }]
-};
+var provenances = [{
+  method: 'html extraction',
+  text: 'the quick brown fox <etk>jumped</etk> over the lazy dog'
+}];
 ```
+
 ```html
 <confidence-marker
-  extraction=[[extraction]]>
+  confidence="100"
+  document-id="1234"
+  provenances="[[provenances]]">
 </confidence-marker>
 ```
 

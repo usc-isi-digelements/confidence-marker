@@ -28,7 +28,9 @@ limitations under the License.
     <template is="dom-repeat" items="[[extractions]]" as="extraction">
       <span>Confidence [[extraction.confidence]]%:</span>
       <confidence-marker
-        extraction="[[extraction]]">
+        confidence="[[extraction.confidence]]"
+        document-id="[[extraction.id]]"
+        provenances="[[extraction.provenance]]">
       </confidence-marker>
     </template>
   </template>
@@ -39,63 +41,43 @@ limitations under the License.
 
       demo.extractions = [
       {
+        id: 1,
         confidence: 100,
         provenance: [{
           method: 'demoMethod',
-          source: {
-            context: {
-              text: '2before 1before <etk> highlighted text</etk> 1after 2after'
-            },
-            segment: 'demoSegmet'
-          }
+          text: '2before 1before <etk> highlighted text</etk> 1after 2after'
         }]
       },
       {
+        id: 2,
         confidence: 99,
         provenance: [{
           method: 'demoMethod',
-          source: {
-            context: {
-              text: '2before 1before <etk> highlighted text</etk> 1after 2after'
-            },
-            segment: 'demoSegmet'
-          }
+          text: '2before 1before <etk> highlighted text</etk> 1after 2after'
         }]
       },
       {
+        id: 3,
         confidence: 66,
         provenance: [{
           method: 'demoMethod',
-          source: {
-            context: {
-              text: '2before 1before <etk> highlighted text</etk> 1after 2after'
-            },
-            segment: 'demoSegmet'
-          }
+          text: '2before 1before <etk> highlighted text</etk> 1after 2after'
         }]
       },
       {
+        id: 4,
         confidence: 33,
         provenance: [{
           method: 'demoMethod',
-          source: {
-            context: {
-              text: '2before 1before <etk> highlighted text</etk> 1after 2after'
-            },
-            segment: 'demoSegmet'
-          }
+          text: '2before 1before <etk> highlighted text</etk> 1after 2after'
         }]
       },
       {
+        id: 5,
         confidence: 0,
         provenance: [{
           method: 'demoMethod',
-          source: {
-            context: {
-              text: '2before 1before <etk> highlighted text</etk> 1after 2after'
-            },
-            segment: 'demoSegmet'
-          }
+          text: '2before 1before <etk> highlighted text</etk> 1after 2after'
         }]
       }];
 

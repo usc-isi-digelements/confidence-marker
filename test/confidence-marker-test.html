@@ -37,74 +37,106 @@ limitations under the License.
         element = fixture('confidence-marker-fixture');
         flush(done);
       });
-      console.log("element2");
-      console.log(element);
 
-      test('default properties are set correctly', function() {
-        expect(element.extraction).to.equal(undefined);
-        expect(element.extractionDataConfidenceProperty).to.equal('confidence');
-        expect(element.extractionDataProvenanceProperty).to.equal('provenance');
-        expect(element.extractionMethodProperty).to.equal('method');
-        expect(element.extractionSegmentProperty).to.deep.equal(['source','segment']);
-        expect(element.extractionContextTextProperty).to.deep.equal(['source','context','text']);
+      test('properties are set as expected', function() {
+        expect(element.confidence).to.equal('0');
+        expect(element.documentId).to.equal('None');
+        expect(element.provenances).to.deep.equal([]);
+        expect(element.provenanceMethodProperty).to.equal('method');
+        expect(element.provenanceTextProperty).to.equal('text');
         expect(element.highlightTag).to.equal('etk');
       });
 
-      test('_getProperty does return correctly', function() {
+      test('_getProperty does return as expected', function() {
         expect(element._getProperty).to.be.a('Function');
-        expect(element._getProperty({}, 'property')).to.equal(undefined);
-        expect(element._getProperty({}, 'property','unavailable')).to.equal('unavailable');
+        expect(element._getProperty({}, 'property')).to.be.undefined;
         expect(element._getProperty({method: 'correctMethod'},'method')).to.equal('correctMethod');
-        expect(element._getProperty({source: {segment: "correctSourceSegment"}},['source','segment'])).to.equal('correctSourceSegment');
-        expect(element._getProperty({source: {context: "correctSourceContext"}},['source','segment'])).to.equal(undefined);
-        expect(element._getProperty({source: {context: "correctSourceContext"}},['source','segment'],'unavailable')).to.equal('unavailable');
       });
 
-      test('_toggleContextDialog functions correctly', function() {
+      test('_toggleProvenanceDialog does open the dialog', function(done) {
+        var dialog = element.$$('#provenanceDialog');
+        expect(dialog.opened).to.be.false;
+        element._toggleProvenanceDialog();
+        flush(function() {
+          expect(dialog.opened).to.be.true;
+          done();
+        });
       });
 
-      test('_getContextID does return correctly', function() {
-        expect(element._getContextID).to.be.a('Function');
-        expect(element._getContextID({},'property')).to.equal('None');
-        expect(element._getContextID({property:undefined},'property')).to.equal('None');
-        expect(element._getContextID({property:[{source:{document_id:undefined}}]},'property')).to.equal('None');
-        expect(element._getContextID({property:[{source:{document_id:'someId'}}]},'property')).to.equal('someId');
-      });
-
-      test('_getContextTextSplit does return correctly', function() {
+      test('_getContextTextSplit does return as expected', function() {
         expect(element._getContextTextSplit).to.be.a('Function');
-        expect(element._getContextTextSplit({})).to.deep.equal(['Unavailable']);
-        expect(element._getContextTextSplit({source:{context:{text:"words"}}})).to.deep.equal(['words']);
-        expect(element._getContextTextSplit({source:{context:{text:"left <etk>inside</etk> right"}}})[0]).to.equal('left ');
-        expect(element._getContextTextSplit({source:{context:{text:"left <etk>inside</etk> right"}}})[1]).to.equal('<etk>inside</etk>');
-        expect(element._getContextTextSplit({source:{context:{text:"left <etk>inside</etk> right"}}})[2]).to.equal(' right');
+        expect(element._getContextTextSplit({}, 'text', 'etk')).to.deep.equal(['None']);
+        expect(element._getContextTextSplit({text:"words"}, 'text', 'etk')).to.deep.equal(['words']);
+        expect(element._getContextTextSplit({text:"<etk>words</etk>"}, 'text', 'etk')).to.deep.equal(['<etk>words</etk>']);
+        expect(element._getContextTextSplit({text:"start left <etk>inner words</etk> right end"}, 'text', 'etk')).to.deep.equal(['start left ', '<etk>inner words</etk>', ' right end']);
+        expect(element._getContextTextSplit({text:"<etk>a < b > c</etk>"}, 'text', 'etk')).to.deep.equal(['<etk>a < b > c</etk>']);
+        expect(element._getContextTextSplit({text:"<etk>a > b < c</etk>"}, 'text', 'etk')).to.deep.equal(['<etk>a > b < c</etk>']);
+        expect(element._getContextTextSplit({text:"a < b > c <etk>words</etk> x < y > z"}, 'text', 'etk')).to.deep.equal(['a < b > c ', '<etk>words</etk>', ' x < y > z']);
+        expect(element._getContextTextSplit({text:"a > b < c <etk>words</etk> x > y < z"}, 'text', 'etk')).to.deep.equal(['a > b < c ', '<etk>words</etk>', ' x > y < z']);
+        expect(element._getContextTextSplit({text:"etk <etk>words</etk> < etk >"}, 'text', 'etk')).to.deep.equal(['etk ', '<etk>words</etk>', ' < etk >']);
+        expect(element._getContextTextSplit({text:"<etk>"}, 'text', 'etk')).to.deep.equal(['<etk>']);
+        expect(element._getContextTextSplit({text:"<etk>one</etk> and <etk>two</etk>"}, 'text', 'etk')).to.deep.equal(['<etk>one</etk>', ' and ', '<etk>two</etk>']);
+        expect(element._getContextTextSplit({property:"<tag>words</tag>"}, 'property', 'tag')).to.deep.equal(['<tag>words</tag>']);
       });
 
-      test('_hasHighlight does return correctly', function() {
+      test('_hasHighlight does return as expected', function() {
         expect(element._hasHighlight).to.be.a('Function');
-        expect(element._hasHighlight('')).to.equal(false);
-        expect(element._hasHighlight('words')).to.equal(false);
-        expect(element._hasHighlight('<etk>words</etk>')).to.equal(true);
+        expect(element._hasHighlight('', '')).to.be.false;
+        expect(element._hasHighlight('words', 'etk')).to.be.false;
+        expect(element._hasHighlight('words', 'tag')).to.be.false;
+        expect(element._hasHighlight('<etk>words</etk>', 'etk')).to.be.true;
+        expect(element._hasHighlight('<tag>words</tag>', 'tag')).to.be.true;
+        expect(element._hasHighlight('<etk>words</etk>', 'tag')).to.be.false;
+        expect(element._hasHighlight('<etk>a < b > c</etk>', 'etk')).to.be.true;
+        expect(element._hasHighlight('<etk>a > b < c</etk>', 'etk')).to.be.true;
+        expect(element._hasHighlight('etk', 'etk')).to.be.false;
+        expect(element._hasHighlight('<etk>', 'etk')).to.be.false;
+        expect(element._hasHighlight('</etk>', 'etk')).to.be.false;
+        expect(element._hasHighlight('< etk > words < / etk >', 'etk')).to.be.false;
       });
 
-      test('_stripTag does return correctly', function() {
+      test('_stripTag does return as expected', function() {
         expect(element._stripTag).to.be.a('Function');
-        expect(element._stripTag('')).to.equal('');
-        expect(element._stripTag('words')).to.equal('');
-        expect(element._stripTag('<etk>words</etk>')).to.equal('words');
+        expect(element._stripTag('', '')).to.equal('');
+        expect(element._stripTag('words', 'etk')).to.equal('words');
+        expect(element._stripTag('words', 'tag')).to.equal('words');
+        expect(element._stripTag('<etk>words</etk>', 'etk')).to.equal('words');
+        expect(element._stripTag('<tag>words</tag>', 'tag')).to.equal('words');
+        expect(element._stripTag('<etk>words</etk>', 'tag')).to.equal('<etk>words</etk>');
+        expect(element._stripTag('<etk>a < b > c</etk>', 'etk')).to.equal('a < b > c');
+        expect(element._stripTag('<etk>a > b < c</etk>', 'etk')).to.equal('a > b < c');
+        expect(element._stripTag('etk', 'etk')).to.equal('etk');
+        expect(element._stripTag('<etk>', 'etk')).to.equal('<etk>');
+        expect(element._stripTag('</etk>', 'etk')).to.equal('</etk>');
+        expect(element._stripTag('< etk > words < / etk >', 'etk')).to.equal('< etk > words < / etk >');
       });
 
-      test('_getConfidenceStyleClass does return correctly', function() {
+      test('_getConfidenceStyleClass does return as expected', function() {
         expect(element._getConfidenceStyleClass).to.be.a('Function');
-        expect(element._getConfidenceStyleClass({},'property')).to.equal('hide');
-        expect(element._getConfidenceStyleClass({property: 0},'property')).to.equal('no');
-        expect(element._getConfidenceStyleClass({property: 1},'property')).to.equal('low');
-        expect(element._getConfidenceStyleClass({property: 33},'property')).to.equal('low');
-        expect(element._getConfidenceStyleClass({property: 34},'property')).to.equal('med');
-        expect(element._getConfidenceStyleClass({property: 66},'property')).to.equal('med');
-        expect(element._getConfidenceStyleClass({property: 67},'property')).to.equal('high');
-        expect(element._getConfidenceStyleClass({property: 99},'property')).to.equal('high');
-        expect(element._getConfidenceStyleClass({property: 100},'property')).to.equal('full');
+        expect(element._getConfidenceStyleClass('')).to.equal('hide');
+        expect(element._getConfidenceStyleClass('-1')).to.equal('hide');
+        expect(element._getConfidenceStyleClass('0')).to.equal('no');
+        expect(element._getConfidenceStyleClass('1')).to.equal('low');
+        expect(element._getConfidenceStyleClass('33')).to.equal('low');
+        expect(element._getConfidenceStyleClass('34')).to.equal('med');
+        expect(element._getConfidenceStyleClass('66')).to.equal('med');
+        expect(element._getConfidenceStyleClass('67')).to.equal('high');
+        expect(element._getConfidenceStyleClass('99')).to.equal('high');
+        expect(element._getConfidenceStyleClass('100')).to.equal('full');
+        expect(element._getConfidenceStyleClass(0)).to.equal('no');
+        expect(element._getConfidenceStyleClass(1)).to.equal('low');
+        expect(element._getConfidenceStyleClass(33)).to.equal('low');
+        expect(element._getConfidenceStyleClass(34)).to.equal('med');
+        expect(element._getConfidenceStyleClass(66)).to.equal('med');
+        expect(element._getConfidenceStyleClass(67)).to.equal('high');
+        expect(element._getConfidenceStyleClass(99)).to.equal('high');
+        expect(element._getConfidenceStyleClass(100)).to.equal('full');
+      });
+
+      test('_getTitle does return as expected', function() {
+        expect(element._getTitle).to.be.a('Function');
+        expect(element._getTitle('0')).to.equal('Confidence:  0% (Click to See Provenance)');
+        expect(element._getTitle('100')).to.equal('Confidence:  100% (Click to See Provenance)');
       });
     });
   </script>
