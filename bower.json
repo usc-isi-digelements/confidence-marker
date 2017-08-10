@@ -1,7 +1,7 @@
 {
   "name": "confidence-marker",
   "description": "A Polymer Element showing an marker that displays confidence and extraction information",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "authors": ["Next Century Corporation"],
   "license": "Apache-2.0",
   "keywords": [

@@ -40,7 +40,7 @@ limitations under the License.
 
       test('properties are set as expected', function() {
         expect(element.confidence).to.equal('0');
-        expect(element.documentId).to.equal('None');
+        expect(element.documentId).to.equal('Not Available');
         expect(element.provenances).to.deep.equal([]);
         expect(element.provenanceMethodProperty).to.equal('method');
         expect(element.provenanceTextProperty).to.equal('text');
@@ -63,52 +63,150 @@ limitations under the License.
         });
       });
 
-      test('_getContextTextSplit does return as expected', function() {
-        expect(element._getContextTextSplit).to.be.a('Function');
-        expect(element._getContextTextSplit({}, 'text', 'etk')).to.deep.equal(['None']);
-        expect(element._getContextTextSplit({text:"words"}, 'text', 'etk')).to.deep.equal(['words']);
-        expect(element._getContextTextSplit({text:"<etk>words</etk>"}, 'text', 'etk')).to.deep.equal(['<etk>words</etk>']);
-        expect(element._getContextTextSplit({text:"start left <etk>inner words</etk> right end"}, 'text', 'etk')).to.deep.equal(['start left ', '<etk>inner words</etk>', ' right end']);
-        expect(element._getContextTextSplit({text:"<etk>a < b > c</etk>"}, 'text', 'etk')).to.deep.equal(['<etk>a < b > c</etk>']);
-        expect(element._getContextTextSplit({text:"<etk>a > b < c</etk>"}, 'text', 'etk')).to.deep.equal(['<etk>a > b < c</etk>']);
-        expect(element._getContextTextSplit({text:"a < b > c <etk>words</etk> x < y > z"}, 'text', 'etk')).to.deep.equal(['a < b > c ', '<etk>words</etk>', ' x < y > z']);
-        expect(element._getContextTextSplit({text:"a > b < c <etk>words</etk> x > y < z"}, 'text', 'etk')).to.deep.equal(['a > b < c ', '<etk>words</etk>', ' x > y < z']);
-        expect(element._getContextTextSplit({text:"etk <etk>words</etk> < etk >"}, 'text', 'etk')).to.deep.equal(['etk ', '<etk>words</etk>', ' < etk >']);
-        expect(element._getContextTextSplit({text:"<etk>"}, 'text', 'etk')).to.deep.equal(['<etk>']);
-        expect(element._getContextTextSplit({text:"<etk>one</etk> and <etk>two</etk>"}, 'text', 'etk')).to.deep.equal(['<etk>one</etk>', ' and ', '<etk>two</etk>']);
-        expect(element._getContextTextSplit({property:"<tag>words</tag>"}, 'property', 'tag')).to.deep.equal(['<tag>words</tag>']);
-      });
+      test('_getPhrases does return as expected', function() {
+        expect(element._getPhrases).to.be.a('Function');
+        expect(element._getPhrases({}, 'text', 'etk')).to.deep.equal([{
+          highlight: false,
+          text: 'Not Available'
+        }]);
 
-      test('_hasHighlight does return as expected', function() {
-        expect(element._hasHighlight).to.be.a('Function');
-        expect(element._hasHighlight('', '')).to.be.false;
-        expect(element._hasHighlight('words', 'etk')).to.be.false;
-        expect(element._hasHighlight('words', 'tag')).to.be.false;
-        expect(element._hasHighlight('<etk>words</etk>', 'etk')).to.be.true;
-        expect(element._hasHighlight('<tag>words</tag>', 'tag')).to.be.true;
-        expect(element._hasHighlight('<etk>words</etk>', 'tag')).to.be.false;
-        expect(element._hasHighlight('<etk>a < b > c</etk>', 'etk')).to.be.true;
-        expect(element._hasHighlight('<etk>a > b < c</etk>', 'etk')).to.be.true;
-        expect(element._hasHighlight('etk', 'etk')).to.be.false;
-        expect(element._hasHighlight('<etk>', 'etk')).to.be.false;
-        expect(element._hasHighlight('</etk>', 'etk')).to.be.false;
-        expect(element._hasHighlight('< etk > words < / etk >', 'etk')).to.be.false;
-      });
+        expect(element._getPhrases({
+          text: 'words'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: false,
+          text: 'words'
+        }]);
 
-      test('_stripTag does return as expected', function() {
-        expect(element._stripTag).to.be.a('Function');
-        expect(element._stripTag('', '')).to.equal('');
-        expect(element._stripTag('words', 'etk')).to.equal('words');
-        expect(element._stripTag('words', 'tag')).to.equal('words');
-        expect(element._stripTag('<etk>words</etk>', 'etk')).to.equal('words');
-        expect(element._stripTag('<tag>words</tag>', 'tag')).to.equal('words');
-        expect(element._stripTag('<etk>words</etk>', 'tag')).to.equal('<etk>words</etk>');
-        expect(element._stripTag('<etk>a < b > c</etk>', 'etk')).to.equal('a < b > c');
-        expect(element._stripTag('<etk>a > b < c</etk>', 'etk')).to.equal('a > b < c');
-        expect(element._stripTag('etk', 'etk')).to.equal('etk');
-        expect(element._stripTag('<etk>', 'etk')).to.equal('<etk>');
-        expect(element._stripTag('</etk>', 'etk')).to.equal('</etk>');
-        expect(element._stripTag('< etk > words < / etk >', 'etk')).to.equal('< etk > words < / etk >');
+        expect(element._getPhrases({
+          text: '<etk>words</etk>'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: true,
+          text: 'words'
+        }]);
+
+        expect(element._getPhrases({
+          text: 'start left <etk>inner words</etk> right end'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: false,
+          text: 'start left'
+        }, {
+          highlight: true,
+          text: 'inner words'
+        }, {
+          highlight: false,
+          text: 'right end'
+        }]);
+
+        expect(element._getPhrases({
+          text: '<etk key="value">words</etk>'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: true,
+          text: 'words'
+        }]);
+
+        expect(element._getPhrases({
+          text: '<etk>a < b > c</etk>'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: true,
+          text: 'a < b > c'
+        }]);
+
+        expect(element._getPhrases({
+          text: '<etk>a > b < c</etk>'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: true,
+          text: 'a > b < c'
+        }]);
+
+        expect(element._getPhrases({
+          text: 'a < b > c <etk>words</etk> x < y > z'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: false,
+          text: 'a < b > c'
+        }, {
+          highlight: true,
+          text: 'words'
+        }, {
+          highlight: false,
+          text: 'x < y > z'
+        }]);
+
+        expect(element._getPhrases({
+          text: 'a > b < c <etk>words</etk> x > y < z'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: false,
+          text: 'a > b < c'
+        }, {
+          highlight: true,
+          text: 'words'
+        }, {
+          highlight: false,
+          text: 'x > y < z'
+        }]);
+
+        expect(element._getPhrases({
+          text: '< etk > <etk>words</etk> </ etk >'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: false,
+          text: '< etk >'
+        }, {
+          highlight: true,
+          text: 'words'
+        }, {
+          highlight: false,
+          text: '</ etk >'
+        }]);
+
+        expect(element._getPhrases({
+          text: 'etk words /etk'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: false,
+          text: 'etk words /etk'
+        }]);
+
+        expect(element._getPhrases({
+          text: '<etk>'
+        }, 'text', 'etk')).to.deep.equal([]);
+
+        expect(element._getPhrases({
+          text: '</etk>'
+        }, 'text', 'etk')).to.deep.equal([]);
+
+        expect(element._getPhrases({
+          text: '<etk>one</etk> and <etk>two</etk>'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: true,
+          text: 'one'
+        }, {
+          highlight: false,
+          text: 'and'
+        }, {
+          highlight: true,
+          text: 'two'
+        }]);
+
+        expect(element._getPhrases({
+          text: ' start and <etk>one</etk> and <etk> </etk> end '
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: false,
+          text: 'start and'
+        }, {
+          highlight: true,
+          text: 'one'
+        }, {
+          highlight: false,
+          text: 'and'
+        }, {
+          highlight: false,
+          text: 'end'
+        }]);
+
+        expect(element._getPhrases({
+          property: '<tag>words</tag>'
+        }, 'property', 'tag')).to.deep.equal([{
+          highlight: true,
+          text: 'words'
+        }]);
       });
 
       test('_getConfidenceStyleClass does return as expected', function() {

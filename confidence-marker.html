@@ -51,10 +51,17 @@ var provenances = [{
         /* Set the width to fit the "Document ID" text plus margin. */
         min-width: 105px;
       }
-      .highlighted {
-        font-weight: bold;
-        background-color: yellow;
+
+      .right-space {
+        margin-right: 5px;
       }
+
+      .highlighted {
+        background-color: yellow;
+        font-weight: bold;
+        padding: 4px;
+      }
+
       .confidence {
         cursor: pointer;
       }
@@ -66,7 +73,7 @@ var provenances = [{
 
       <styled-dialog id="provenanceDialog" header="Extraction Data Provenance" on-tap="_toggleProvenanceDialog">
         <template is="dom-if" if="[[!provenances]]">
-          <div>None</div>
+          <div>Not Available</div>
         </template>
 
         <template is="dom-if" if="[[provenances]]">
@@ -77,19 +84,21 @@ var provenances = [{
           <div class="styled-dialog-divider"></div>
           <div class="layout horizontal wrap">
             <strong class="styled-dialog-name">Text</strong>
-            <template is="dom-repeat" items="[[_getContextTextSplit(item, provenanceTextProperty, highlightTag)]]">
-              <span class="styled-dialog-right-space">
-                <template is="dom-if" if$="[[_hasHighlight(item, highlightTag)]]">
-                  <span class="highlighted">[[_stripTag(item, highlightTag)]]</span>
+            <template is="dom-repeat" items="[[_getPhrases(item, provenanceTextProperty, highlightTag)]]">
+              <span class="right-space">
+                <template is="dom-if" if$="[[item.highlight]]">
+                  <span class="highlighted">[[item.text]]</span>
                 </template>
-                <template is="dom-if" if$="[[!_hasHighlight(item, highlightTag)]]">
-                  [[item]]
+                <template is="dom-if" if$="[[!item.highlight]]">
+                  [[item.text]]
                 </template>
               </span>
             </template>
           </div>
 
-          <div><strong class="styled-dialog-name">Method</strong><span>[[_getProperty(item, provenanceMethodProperty)]]</span></div>
+          <template is="dom-if" if="[[_getProperty(item, provenanceMethodProperty)]]">
+            <div><strong class="styled-dialog-name">Method</strong><span>[[_getProperty(item, provenanceMethodProperty)]]</span></div>
+          </template>
         </template>
       </styled-dialog>
     </div>
@@ -121,11 +130,11 @@ var provenances = [{
          * The document ID.
          *
          * @type {String}
-         * @default 'None'
+         * @default 'Not Available'
          */
         documentId: {
           type: String,
-          value: 'None'
+          value: 'Not Available'
         },
 
         /**
@@ -219,49 +228,57 @@ var provenances = [{
       },
 
       /**
-       * Returns the provenance text as an array split so that highlighted tags are seperate from normal text.
+       * Returns the list of phrase objects with the text and the highlight status using the given item, property, and highlight tag.
        *
        * @param {Object} item
+       * @param {String} property
+       * @param {String} highlightTag
        * @return {Array}
        * @private
        */
-      _getContextTextSplit: function(item, property, highlightTag) {
+      _getPhrases: function(item, property, highlightTag) {
         if(!item[property]) {
-          return ['None'];
+          return [{
+            highlight: false,
+            text: 'Not Available'
+          }];
         }
-        // TODO Why do we need the <splithere> tags?
-        return item[property]
-          .replace(new RegExp('<' + highlightTag + '>', 'g') , '<splithere><' + highlightTag + '>')
-          .replace(new RegExp('</' + highlightTag + '>', 'g') , '</' + highlightTag+'><splithere>')
-          .split('<splithere>')
-          .filter(function(text) {
-            return !!text;
+
+        var splitTag = '<' + highlightTag + '>';
+
+        var sentence = item[property]
+          .replace(new RegExp('<' + highlightTag + '.*?>', 'g') , splitTag)
+          .replace(new RegExp('</' + highlightTag + '>', 'g') , splitTag);
+
+        var phrases = [];
+
+        while(sentence.indexOf(splitTag) >= 0) {
+          var previousPhrase = sentence.substring(0, sentence.indexOf(splitTag));
+          if(previousPhrase.trim()) {
+            phrases.push({
+              highlight: false,
+              text: previousPhrase.trim()
+            });
+          }
+          sentence = sentence.substring(sentence.indexOf(splitTag) + splitTag.length);
+          var nextPhrase = sentence.substring(0, sentence.indexOf(splitTag));
+          if(nextPhrase.trim()) {
+            phrases.push({
+              highlight: true,
+              text: nextPhrase.trim()
+            });
+          }
+          sentence = sentence.substring(sentence.indexOf(splitTag) + splitTag.length);
+        }
+
+        if(sentence.trim()) {
+          phrases.push({
+            highlight: false,
+            text: sentence.trim()
           });
-      },
+        }
 
-      /**
-       * Returns if the text contains highlighted tags.
-       *
-       * @param {String} raw
-       * @param {String} highlightTag
-       * @return {Boolean}
-       * @private
-       */
-      _hasHighlight: function(raw, highlightTag) {
-        return (raw.indexOf('<' + highlightTag + '>') >= 0 && raw.indexOf('</' + highlightTag + '>') >= 0);
-      },
-
-      /**
-       * Removes the highlighted tags from a string.
-       *
-       * @param {String} raw
-       * @param {String} highlightTag
-       * @return {String}
-       * @private
-       */
-      _stripTag: function(raw, highlightTag) {
-        var cut = raw.substring(raw.indexOf('<' + highlightTag + '>') + highlightTag.length + 2);
-        return cut.substring(0, cut.indexOf('</' + highlightTag + '>')) || raw;
+        return phrases;
       },
 
       /**
