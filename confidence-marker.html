@@ -290,19 +290,22 @@ var provenances = [{
        */
       _getConfidenceStyleClass: function(confidence) {
         var confidenceNumber = Number(confidence);
-        if(confidenceNumber > 99) {
-          return 'full';
+        if(confidenceNumber > 90) {
+          return 'level5';
         }
-        if(confidenceNumber > 66) {
-          return 'high';
+        if(confidenceNumber > 80) {
+          return 'level4';
         }
-        if(confidenceNumber > 33) {
-          return 'med';
+        if(confidenceNumber > 60) {
+          return 'level3';
+        }
+        if(confidenceNumber > 30) {
+          return 'level2';
         }
         if(confidenceNumber > 0) {
-          return 'low';
+          return 'level1';
         }
-        return (confidence === 0 || confidence === '0') ? 'no' : 'hide';
+        return (confidence === 0 || confidence === '0') ? 'level0' : 'hide';
       }
     });
   })();

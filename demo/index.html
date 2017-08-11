@@ -26,7 +26,7 @@ limitations under the License.
   <template is="dom-bind" id="demo">
     <p>Extractions: [[stringify(extractions)]]</p>
     <template is="dom-repeat" items="[[extractions]]" as="extraction">
-      <span>Confidence [[extraction.confidence]]%:</span>
+      <span>Confidence [[extraction.confidence]]%</span>
       <confidence-marker
         confidence="[[extraction.confidence]]"
         document-id="[[extraction.id]]"
@@ -41,7 +41,7 @@ limitations under the License.
 
       demo.extractions = [
       {
-        id: 1,
+        id: 0,
         confidence: 100,
         provenance: [{
           method: 'demoMethod',
@@ -49,8 +49,16 @@ limitations under the License.
         }]
       },
       {
+        id: 1,
+        confidence: 90,
+        provenance: [{
+          method: 'demoMethod',
+          text: '2before 1before <etk> highlighted text</etk> 1after 2after'
+        }]
+      },
+      {
         id: 2,
-        confidence: 99,
+        confidence: 80,
         provenance: [{
           method: 'demoMethod',
           text: '2before 1before <etk> highlighted text</etk> 1after 2after'
@@ -58,7 +66,7 @@ limitations under the License.
       },
       {
         id: 3,
-        confidence: 66,
+        confidence: 60,
         provenance: [{
           method: 'demoMethod',
           text: '2before 1before <etk> highlighted text</etk> 1after 2after'
@@ -66,7 +74,7 @@ limitations under the License.
       },
       {
         id: 4,
-        confidence: 33,
+        confidence: 30,
         provenance: [{
           method: 'demoMethod',
           text: '2before 1before <etk> highlighted text</etk> 1after 2after'

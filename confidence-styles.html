@@ -27,25 +27,31 @@ limitations under the License.
       .confidence:before {
         content: '';
         position: absolute;
-        height: 12px;
-        width: 12px;
-        border: 2px solid var(--primary-text-color);
-        border-radius: 50%;
+        height: 6px;
+        width: 10px;
+        border: 1px solid white;
+        border-radius: 1px;
+        box-shadow: 0 0 0 1px black;
+        margin: 4px 2px;
       }
 
-      .confidence.left.low {
-        width: 4px;
+      .confidence.left.level1 {
+        width: 5px;
       }
 
-      .confidence.left.med {
-        width: 8px;
+      .confidence.left.level2 {
+        width: 7px;
       }
 
-      .confidence.left.high {
-        width: 12px;
+      .confidence.left.level3 {
+        width: 9px;
       }
 
-      .confidence.left.full {
+      .confidence.left.level4 {
+        width: 11px;
+      }
+
+      .confidence.left.level5 {
         width: 16px;
       }
 
@@ -53,39 +59,47 @@ limitations under the License.
         margin-right: 5px;
       }
 
-      .confidence.right.no {
+      .confidence.right.level0 {
         width: 16px;
       }
 
-      .confidence.right.low {
-        width: 12px;
+      .confidence.right.level1 {
+        width: 11px;
       }
 
-      .confidence.right.med {
-        width: 8px;
+      .confidence.right.level2 {
+        width: 9px;
       }
 
-      .confidence.right.high {
-        width: 4px;
+      .confidence.right.level3 {
+        width: 7px;
+      }
+
+      .confidence.right.level4 {
+        width: 5px;
       }
 
       .confidence.left:before {
         left: 0;
       }
 
-      .confidence.left.low:before {
+      .confidence.left.level1:before {
         background: var(--paper-red-600);
       }
 
-      .confidence.left.med:before {
+      .confidence.left.level2:before {
+        background: var(--paper-orange-600);
+      }
+
+      .confidence.left.level3:before {
         background: var(--paper-yellow-600);
       }
 
-      .confidence.left.high:before {
+      .confidence.left.level4:before {
         background: var(--paper-light-green-600);
       }
 
-      .confidence.left.full:before {
+      .confidence.left.level5:before {
         background: var(--paper-green-600);
       }
 
