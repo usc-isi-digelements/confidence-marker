@@ -18,69 +18,67 @@ limitations under the License.
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
   <link rel="import" href="../confidence-marker.html">
 </head>
 
 <body unresolved>
-  <template is="dom-bind" id="demo">
-    <p>Extractions: [[stringify(extractions)]]</p>
-    <template is="dom-repeat" items="[[extractions]]" as="extraction">
-      <span>Confidence [[extraction.confidence]]%</span>
-      <confidence-marker
-        confidence="[[extraction.confidence]]"
-        document-id="[[extraction.id]]"
-        provenances="[[extraction.provenance]]">
-      </confidence-marker>
+  <dom-bind id="demo">
+    <template is="dom-bind">
+      <template is="dom-if" if="[[stringify]]">
+        <p>Extractions: [[stringify(extractions)]]</p>
+      </template>
+      <template is="dom-repeat" items="[[extractions]]" as="extraction">
+        <span>Confidence [[extraction.confidence]]%</span>
+        <confidence-marker
+          confidence="[[extraction.confidence]]"
+          document-id="[[extraction.id]]"
+          provenances="[[extraction.provenance]]">
+        </confidence-marker>
+      </template>
     </template>
-  </template>
+  </dom-bind>
 
   <script>
     (function(document) {
-      var demo = document.querySelector('#demo');
+      var demo = document.querySelector('dom-bind');
 
-      demo.extractions = [
-      {
+      demo.extractions = [{
         id: 0,
         confidence: 100,
         provenance: [{
           method: 'demoMethod',
           text: '2before 1before <etk> highlighted text</etk> 1after 2after'
         }]
-      },
-      {
+      }, {
         id: 1,
         confidence: 90,
         provenance: [{
           method: 'demoMethod',
           text: '2before 1before <etk> highlighted text</etk> 1after 2after'
         }]
-      },
-      {
+      }, {
         id: 2,
         confidence: 80,
         provenance: [{
           method: 'demoMethod',
           text: '2before 1before <etk> highlighted text</etk> 1after 2after'
         }]
-      },
-      {
+      }, {
         id: 3,
         confidence: 60,
         provenance: [{
           method: 'demoMethod',
           text: '2before 1before <etk> highlighted text</etk> 1after 2after'
         }]
-      },
-      {
+      }, {
         id: 4,
         confidence: 30,
         provenance: [{
           method: 'demoMethod',
           text: '2before 1before <etk> highlighted text</etk> 1after 2after'
         }]
-      },
-      {
+      }, {
         id: 5,
         confidence: 0,
         provenance: [{

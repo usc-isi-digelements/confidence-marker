@@ -14,8 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+<link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../styled-dialog/styled-dialog.html">
+<link rel="import" href="../styled-dialog/styled-dialog-styles.html">
 <link rel="import" href="confidence-styles.html">
 
 <!--
@@ -42,20 +44,11 @@ var provenances = [{
 
 <dom-module id="confidence-marker">
   <template>
-    <style include="confidence-styles"></style>
     <style include="iron-flex iron-flex-alignment iron-flex-factors"></style>
+    <style include="styled-dialog-styles"></style>
+    <style include="confidence-styles"></style>
 
     <style>
-      styled-dialog ::content .inside .styled-dialog-name {
-        display: inline-block;
-        /* Set the width to fit the "Document ID" text plus margin. */
-        min-width: 105px;
-      }
-
-      .right-space {
-        margin-right: 5px;
-      }
-
       .highlighted {
         background-color: yellow;
         font-weight: bold;
@@ -64,6 +57,11 @@ var provenances = [{
 
       .confidence {
         cursor: pointer;
+      }
+
+      .styled-dialog-name {
+        /* Set the width to fit the "Document ID" text plus margin. */
+        min-width: 105px;
       }
     </style>
 
@@ -77,7 +75,10 @@ var provenances = [{
         </template>
 
         <template is="dom-if" if="[[provenances]]">
-          <div><strong class="styled-dialog-name">Document ID</strong><span>[[documentId]]</span></div>
+          <div class="layout horizontal">
+            <strong class="styled-dialog-name">Document ID</strong>
+            <span>[[documentId]]</span>
+          </div>
         </template>
 
         <template is="dom-repeat" items="[[provenances]]">
@@ -85,11 +86,11 @@ var provenances = [{
           <div class="layout horizontal wrap">
             <strong class="styled-dialog-name">Text</strong>
             <template is="dom-repeat" items="[[_getPhrases(item, provenanceTextProperty, highlightTag)]]">
-              <span class="right-space">
-                <template is="dom-if" if$="[[item.highlight]]">
+              <span class="styled-dialog-right-space">
+                <template is="dom-if" if="[[item.highlight]]">
                   <span class="highlighted">[[item.text]]</span>
                 </template>
-                <template is="dom-if" if$="[[!item.highlight]]">
+                <template is="dom-if" if="[[!item.highlight]]">
                   [[item.text]]
                 </template>
               </span>
@@ -97,7 +98,10 @@ var provenances = [{
           </div>
 
           <template is="dom-if" if="[[_getProperty(item, provenanceMethodProperty)]]">
-            <div><strong class="styled-dialog-name">Method</strong><span>[[_getProperty(item, provenanceMethodProperty)]]</span></div>
+            <div class="layout horizontal">
+              <strong class="styled-dialog-name">Method</strong>
+              <span>[[_getProperty(item, provenanceMethodProperty)]]</span>
+            </div>
           </template>
         </template>
       </styled-dialog>
@@ -237,7 +241,7 @@ var provenances = [{
        * @private
        */
       _getPhrases: function(item, property, highlightTag) {
-        if(!item[property]) {
+        if(!item || !item[property]) {
           return [{
             highlight: false,
             text: 'Not Available'
