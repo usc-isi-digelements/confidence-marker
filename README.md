@@ -1,3 +1,28 @@
+# Elements
+
+Polymer Elements showing the confidence and provenance of an extraction using a marker or dialog.
+
+### Dependencies
+
+Dependencies are installed using [Bower](http://bower.io/):
+
+    npm install -g bower
+    bower install
+
+### Testing
+
+Tests are run using [web-component-tester](https://github.com/Polymer/web-component-tester):
+
+    npm install -g web-component-tester
+    wct
+
+### Demonstration & Documentation
+
+Demonstration and documentation are viewed using [polyserve](https://github.com/PolymerLabs/polyserve):
+
+    npm install -g polyserve
+    polyserve
+
 # confidence-marker
 
 A Polymer Element showing the confidence of an extraction with on-tap behavior.
@@ -28,24 +53,3 @@ var provenances = [{
   provenances="[[provenances]]">
 </confidence-dialog>
 ```
-
-### Dependencies
-
-Dependencies are installed using [Bower](http://bower.io/):
-
-    npm install -g bower
-    bower install
-
-### Testing
-
-Tests are run using [web-component-tester](https://github.com/Polymer/web-component-tester):
-
-    npm install -g web-component-tester
-    wct
-
-### Demonstration & Documentation
-
-Demonstration and documentation are viewed using [polyserve](https://github.com/PolymerLabs/polyserve):
-
-    npm install -g polyserve
-    polyserve
