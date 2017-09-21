@@ -16,28 +16,15 @@ limitations under the License.
 
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
-<link rel="import" href="../neon-animation/neon-animations.html">
-<link rel="import" href="../neon-animation/web-animations.html">
-<link rel="import" href="../styled-dialog/styled-dialog.html">
-<link rel="import" href="../styled-dialog/styled-dialog-styles.html">
 <link rel="import" href="confidence-styles.html">
 
 <!--
-A Polymer Element showing the confidence of an extraction that opens a dialog with the provenance details of that extraction.
+A Polymer Element showing the confidence of an extraction with on-tap behavior.
 
 ### Example
-```js
-var provenances = [{
-  method: 'html extraction',
-  text: 'the quick brown fox <etk>jumped</etk> over the lazy dog'
-}];
-```
-
 ```html
 <confidence-marker
-  confidence="100"
-  document-id="1234"
-  provenances="[[provenances]]">
+  confidence="100">
 </confidence-marker>
 ```
 
@@ -46,73 +33,29 @@ var provenances = [{
 
 <dom-module id="confidence-marker">
   <template>
-    <style include="iron-flex iron-flex-alignment iron-flex-factors"></style>
-    <style include="styled-dialog-styles"></style>
+    <style include="iron-flex iron-flex-alignment"></style>
     <style include="confidence-styles"></style>
 
     <style>
-      .highlighted {
-        background-color: yellow;
-        font-weight: bold;
-        padding: 4px;
+      :host {
+        @apply --layout-horizontal;
+        @apply --layout-center;
       }
 
       .confidence {
         cursor: pointer;
       }
-
-      .styled-dialog-name {
-        /* Set the width to fit the "Document ID" text plus margin. */
-        min-width: 105px;
-      }
     </style>
 
-    <div class="layout horizontal center extraction-item">
-      <span class$="confidence left [[_getConfidenceStyleClass(confidence)]]" title$="[[_getTitle(confidence)]]" on-tap="_toggleProvenanceDialog"></span>
-      <span class$="confidence right [[_getConfidenceStyleClass(confidence)]]" title$="[[_getTitle(confidence)]]" on-tap="_toggleProvenanceDialog"></span>
+    <span class$="confidence left [[_getConfidenceStyleClass(confidence)]]" title$="[[_getTitle(confidence)]]" on-tap="_select"></span>
+    <span class$="confidence right [[_getConfidenceStyleClass(confidence)]]" title$="[[_getTitle(confidence)]]" on-tap="_select"></span>
 
-      <styled-dialog id="provenanceDialog" header="Extraction Data Provenance" on-tap="_toggleProvenanceDialog">
-        <template is="dom-if" if="[[!provenances]]">
-          <div>Not Available</div>
-        </template>
-
-        <template is="dom-if" if="[[provenances]]">
-          <div class="layout horizontal">
-            <strong class="styled-dialog-name">Document ID</strong>
-            <span>[[documentId]]</span>
-          </div>
-        </template>
-
-        <template is="dom-repeat" items="[[provenances]]">
-          <div class="styled-dialog-divider"></div>
-          <div class="layout horizontal wrap">
-            <strong class="styled-dialog-name">Text</strong>
-            <template is="dom-repeat" items="[[_getPhrases(item, provenanceTextProperty, highlightTag)]]">
-              <span class="styled-dialog-right-space">
-                <template is="dom-if" if="[[item.highlight]]">
-                  <span class="highlighted">[[item.text]]</span>
-                </template>
-                <template is="dom-if" if="[[!item.highlight]]">
-                  [[item.text]]
-                </template>
-              </span>
-            </template>
-          </div>
-
-          <template is="dom-if" if="[[_getProperty(item, provenanceMethodProperty)]]">
-            <div class="layout horizontal">
-              <strong class="styled-dialog-name">Method</strong>
-              <span>[[_getProperty(item, provenanceMethodProperty)]]</span>
-            </div>
-          </template>
-        </template>
-      </styled-dialog>
-    </div>
   </template>
 
   <script>
   (function() {
     'use strict';
+
     Polymer({
       is: 'confidence-marker',
 
@@ -131,160 +74,18 @@ var provenances = [{
         },
 
         /**
-         * (Optional)
+         * (Output)
          *
-         * The document ID.
+         * Whether the confidence marker is selected.  Tapping the marker sets selected to true and then to false, firing two "changed" observable events.
          *
-         * @type {String}
-         * @default 'Not Available'
+         * @type {Boolean}
+         * @default false
          */
-        documentId: {
-          type: String,
-          value: 'Not Available'
-        },
-
-        /**
-         * (Optional)
-         *
-         * The list of extraction provenance objects.
-         *
-         * @type {Array}
-         * @default []
-         */
-        provenances: {
-          type: String,
-          value: function() {
-            return [];
-          }
-        },
-
-        /**
-         * (Optional) 
-         *
-         * The property of the method in the provenance objects.
-         *
-         * @type {String}
-         * @default 'method'
-         */
-        provenanceMethodProperty: {
-          type: String,
-          value: 'method'
-        },
-
-        /**
-         * (Optional) 
-         *
-         * The property of the text in the provenance objects.
-         *
-         * @type {String}
-         * @default 'text'
-         */
-        provenanceTextProperty: {
-          type: Array,
-          value: 'text'
-        },
-
-        /**
-         * (Optional) 
-         *
-         * The highlight tag used in the provenance text.  Assumes the format:  `<highlightTag>text</highlightTag>`
-         *
-         * @type {String}
-         * @default 'etk'
-         */
-        highlightTag: {
-          type: String,
-          value: 'etk'
+        selected: {
+          notify: true,
+          type: Boolean,
+          value: false
         }
-      },
-
-      /**
-       * Returns the object in the given item at the given property.
-       *
-       * @param {Object} item
-       * @param {Array} property
-       * @return {Object}
-       * @private
-       */
-      _getProperty: function(item, property) {
-        return item[property];
-      },
-
-      /**
-       * Returns the title based on the given confidence.
-       *
-       * @param {String} confidence
-       * @return {String}
-       * @private
-       */
-      _getTitle: function(confidence) {
-        return 'Confidence:  ' + confidence + '% (Click to See Provenance)';
-      },
-
-      /**
-       * Opens the provenance dialog.
-       *
-       * @private
-       */
-      _toggleProvenanceDialog: function(e) {
-        if(e) {
-          e.stopPropagation();
-        }
-        this.$.provenanceDialog.open();
-      },
-
-      /**
-       * Returns the list of phrase objects with the text and the highlight status using the given item, property, and highlight tag.
-       *
-       * @param {Object} item
-       * @param {String} property
-       * @param {String} highlightTag
-       * @return {Array}
-       * @private
-       */
-      _getPhrases: function(item, property, highlightTag) {
-        if(!item || !item[property]) {
-          return [{
-            highlight: false,
-            text: 'Not Available'
-          }];
-        }
-
-        var splitTag = '<' + highlightTag + '>';
-
-        var sentence = item[property]
-          .replace(new RegExp('<' + highlightTag + '.*?>', 'g') , splitTag)
-          .replace(new RegExp('</' + highlightTag + '>', 'g') , splitTag);
-
-        var phrases = [];
-
-        while(sentence.indexOf(splitTag) >= 0) {
-          var previousPhrase = sentence.substring(0, sentence.indexOf(splitTag));
-          if(previousPhrase.trim()) {
-            phrases.push({
-              highlight: false,
-              text: previousPhrase.trim()
-            });
-          }
-          sentence = sentence.substring(sentence.indexOf(splitTag) + splitTag.length);
-          var nextPhrase = sentence.substring(0, sentence.indexOf(splitTag));
-          if(nextPhrase.trim()) {
-            phrases.push({
-              highlight: true,
-              text: nextPhrase.trim()
-            });
-          }
-          sentence = sentence.substring(sentence.indexOf(splitTag) + splitTag.length);
-        }
-
-        if(sentence.trim()) {
-          phrases.push({
-            highlight: false,
-            text: sentence.trim()
-          });
-        }
-
-        return phrases;
       },
 
       /**
@@ -312,6 +113,28 @@ var provenances = [{
           return 'level1';
         }
         return (confidence === 0 || confidence === '0') ? 'level0' : 'hide';
+      },
+
+      /**
+       * Returns the title based on the given confidence.
+       *
+       * @param {String} confidence
+       * @return {String}
+       * @private
+       */
+      _getTitle: function(confidence) {
+        return 'Confidence:  ' + confidence + '% (Click to See Provenance)';
+      },
+
+      /**
+       * Sets `selected` to true and then to false, firing two "changed" observable events.
+       */
+      _select: function(event) {
+        if(event) {
+          event.stopPropagation();
+        }
+        this.set('selected', true);
+        this.set('selected', false);
       }
     });
   })();

@@ -1,6 +1,17 @@
 # confidence-marker
 
-A Polymer Element showing the confidence of an extraction that opens a dialog with the provenance details of that extraction.
+A Polymer Element showing the confidence of an extraction with on-tap behavior.
+
+### Example
+```html
+<confidence-marker
+  confidence="100">
+</confidence-marker>
+```
+
+# confidence-dialog
+
+A Polymer Element showing a dialog with the confidence and provenance details of an extraction.
 
 ### Example
 ```js
@@ -11,11 +22,11 @@ var provenances = [{
 ```
 
 ```html
-<confidence-marker
+<confidence-dialog
   confidence="100"
   document-id="1234"
   provenances="[[provenances]]">
-</confidence-marker>
+</confidence-dialog>
 ```
 
 ### Dependencies

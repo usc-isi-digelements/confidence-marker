@@ -1,14 +1,17 @@
 {
   "name": "confidence-marker",
-  "description": "A Polymer Element showing an marker that displays confidence and extraction information",
-  "version": "2.1.1",
+  "description": "Polymer Elements showing the confidence and provenance of an extraction using a marker or dialog.",
+  "version": "2.2.0",
   "authors": ["Next Century Corporation"],
   "license": "Apache-2.0",
   "keywords": [
     "web-component",
     "polymer"
   ],
-  "main": "confidence-marker.html",
+  "main": [
+    "confidence-marker.html",
+    "confidence-dialog.html"
+  ],
   "homepage": "https://github.com/DigElements/confidence-marker/",
   "ignore": [
     "/.*",
@@ -17,7 +20,7 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.2",
     "iron-flex-layout": "PolymerElements/iron-flex-layout#^2.0.0",
-    "styled-dialog": "DigElements/styled-dialog#2.1.0",
+    "styled-dialog": "DigElements/styled-dialog#2.1.1",
     "web-animations-js": "web-animations/web-animations-js#^2.2"
   },
   "devDependencies": {

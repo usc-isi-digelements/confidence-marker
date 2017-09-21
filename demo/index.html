@@ -20,77 +20,101 @@ limitations under the License.
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
   <link rel="import" href="../confidence-marker.html">
+  <link rel="import" href="../confidence-dialog.html">
 </head>
 
 <body unresolved>
   <dom-bind id="demo">
+    <script>
+      (function(document) {
+        var demo = document.querySelector('dom-bind');
+
+        demo.extractions = [{
+          confidence: 0,
+          documentId: 1,
+          provenances: []
+        }, {
+          confidence: 30,
+          documentId: 2,
+          provenances: [{
+            text: 'A quick brown fox jumps over the lazy dog.'
+          }]
+        }, {
+          confidence: 60,
+          documentId: 3,
+          provenances: [{
+            method: 'Description',
+            text: 'A quick brown fox jumps over the lazy dog.'
+          }]
+        }, {
+          confidence: 80,
+          documentId: 4,
+          provenances: [{
+            method: 'Description',
+            text: 'A quick brown <etk>fox</etk> jumps over the lazy <etk>dog</etk>.'
+          }]
+        }, {
+          confidence: 90,
+          documentId: 5,
+          provenances: [{
+            method: 'Title',
+            text: '<etk>Fox</etk> and <etk>Dog</etk>'
+          }, {
+            method: 'Description',
+            text: 'A quick brown <etk>fox</etk> jumps over the lazy <etk>dog</etk>.'
+          }]
+        }, {
+          confidence: 100,
+          documentId: 6,
+          provenances: [{
+            method: 'Title',
+            text: '<etk>Fox</etk> and <etk>Dog</etk>'
+          }, {
+            method: 'Description',
+            text: 'A quick brown <etk>fox</etk> jumps over the lazy <etk>dog</etk>.'
+          }, {
+            method: 'URL',
+            text: 'http://quickbrown<etk>fox</etk>lazy<etk>dog</etk>.com'
+          }]
+        }];
+
+        demo.onSelectedChanged = function(event) {
+          if(event.detail.value) {
+            demo.set('extractionToShow', {
+              confidence: event.model.extraction.confidence,
+              documentId: event.model.extraction.documentId,
+              provenances: event.model.extraction.provenances
+            });
+            document.querySelector('confidence-dialog').open();
+          }
+        };
+
+        demo.stringify = function(object) {
+          return JSON.stringify(object);
+        };
+      })(document);
+    </script>
+
     <template is="dom-bind">
-      <template is="dom-if" if="[[stringify]]">
-        <p>Extractions: [[stringify(extractions)]]</p>
-      </template>
+      <p>on-selected-changed Function:  [[onSelectedChanged]]</p>
+      <p>Marker Data: [[stringify(extractions)]]</p>
+      <p>Dialog Data: [[stringify(extractionToShow)]]</p>
+      <p>Marker Elements:</p>
+
       <template is="dom-repeat" items="[[extractions]]" as="extraction">
         <span>Confidence [[extraction.confidence]]%</span>
         <confidence-marker
           confidence="[[extraction.confidence]]"
-          document-id="[[extraction.id]]"
-          provenances="[[extraction.provenance]]">
+          on-selected-changed="onSelectedChanged">
         </confidence-marker>
       </template>
+
+      <confidence-dialog
+        confidence="[[extractionToShow.confidence]]"
+        document-id="[[extractionToShow.documentId]]"
+        provenances="[[extractionToShow.provenances]]">
+      </confidence-dialog>
     </template>
   </dom-bind>
-
-  <script>
-    (function(document) {
-      var demo = document.querySelector('dom-bind');
-
-      demo.extractions = [{
-        id: 0,
-        confidence: 100,
-        provenance: [{
-          method: 'demoMethod',
-          text: '2before 1before <etk> highlighted text</etk> 1after 2after'
-        }]
-      }, {
-        id: 1,
-        confidence: 90,
-        provenance: [{
-          method: 'demoMethod',
-          text: '2before 1before <etk> highlighted text</etk> 1after 2after'
-        }]
-      }, {
-        id: 2,
-        confidence: 80,
-        provenance: [{
-          method: 'demoMethod',
-          text: '2before 1before <etk> highlighted text</etk> 1after 2after'
-        }]
-      }, {
-        id: 3,
-        confidence: 60,
-        provenance: [{
-          method: 'demoMethod',
-          text: '2before 1before <etk> highlighted text</etk> 1after 2after'
-        }]
-      }, {
-        id: 4,
-        confidence: 30,
-        provenance: [{
-          method: 'demoMethod',
-          text: '2before 1before <etk> highlighted text</etk> 1after 2after'
-        }]
-      }, {
-        id: 5,
-        confidence: 0,
-        provenance: [{
-          method: 'demoMethod',
-          text: '2before 1before <etk> highlighted text</etk> 1after 2after'
-        }]
-      }];
-
-      demo.stringify = function(object) {
-        return JSON.stringify(object);
-      };
-    })(document);
-  </script>
 </body>
 </html>

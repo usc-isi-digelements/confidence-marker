@@ -1,0 +1,261 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <link rel="import" href="../confidence-dialog.html">
+</head>
+
+<body>
+  <test-fixture id="confidence-dialog-fixture">
+    <template>
+      <confidence-dialog></confidence-dialog>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('confidence-dialog tests', function() {
+      var element;
+      setup(function(done) {
+        element = fixture('confidence-dialog-fixture');
+        flush(done);
+      });
+
+      test('properties are set as expected', function() {
+        expect(element.confidence).to.equal('Not Available');
+        expect(element.documentId).to.equal('Not Available');
+        expect(element.provenances).to.deep.equal([]);
+        expect(element.provenanceMethodProperty).to.equal('method');
+        expect(element.provenanceTextProperty).to.equal('text');
+        expect(element.highlightTag).to.equal('etk');
+      });
+
+      test('does have dialog element', function() {
+        expect(element.$$('styled-dialog')).to.exist;
+        expect(element.$$('styled-dialog').id).to.equal('confidenceDialog');
+        expect(element.$$('styled-dialog').header).to.equal('Extraction Data Provenance');
+        expect(element.$$('styled-dialog').fill).to.be.false;
+        expect(element.$$('styled-dialog').modal).to.be.false;
+        expect(element.$$('styled-dialog').opened).to.be.false;
+
+        var names = Polymer.dom(element.root).querySelectorAll('.styled-dialog-name');
+        expect(names.length).to.equal(2);
+        expect(names[0].innerHTML).to.equal('Confidence');
+        expect(names[1].innerHTML).to.equal('Document ID');
+      });
+
+      test('_getProperty does return as expected', function() {
+        expect(element._getProperty).to.be.a('Function');
+        expect(element._getProperty({}, 'property')).to.be.undefined;
+        expect(element._getProperty({
+          key: 'value'
+        }, 'key')).to.equal('value');
+      });
+
+      test('_getPhrases does return as expected', function() {
+        expect(element._getPhrases).to.be.a('Function');
+        expect(element._getPhrases({}, 'text', 'etk')).to.deep.equal([{
+          highlight: false,
+          text: 'Not Available'
+        }]);
+
+        expect(element._getPhrases({
+          text: 'words'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: false,
+          text: 'words'
+        }]);
+
+        expect(element._getPhrases({
+          text: '<etk>words</etk>'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: true,
+          text: 'words'
+        }]);
+
+        expect(element._getPhrases({
+          text: 'start left <etk>inner words</etk> right end'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: false,
+          text: 'start left'
+        }, {
+          highlight: true,
+          text: 'inner words'
+        }, {
+          highlight: false,
+          text: 'right end'
+        }]);
+
+        expect(element._getPhrases({
+          text: '<etk key="value">words</etk>'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: true,
+          text: 'words'
+        }]);
+
+        expect(element._getPhrases({
+          text: '<etk>a < b > c</etk>'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: true,
+          text: 'a < b > c'
+        }]);
+
+        expect(element._getPhrases({
+          text: '<etk>a > b < c</etk>'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: true,
+          text: 'a > b < c'
+        }]);
+
+        expect(element._getPhrases({
+          text: 'a < b > c <etk>words</etk> x < y > z'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: false,
+          text: 'a < b > c'
+        }, {
+          highlight: true,
+          text: 'words'
+        }, {
+          highlight: false,
+          text: 'x < y > z'
+        }]);
+
+        expect(element._getPhrases({
+          text: 'a > b < c <etk>words</etk> x > y < z'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: false,
+          text: 'a > b < c'
+        }, {
+          highlight: true,
+          text: 'words'
+        }, {
+          highlight: false,
+          text: 'x > y < z'
+        }]);
+
+        expect(element._getPhrases({
+          text: '< etk > <etk>words</etk> </ etk >'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: false,
+          text: '< etk >'
+        }, {
+          highlight: true,
+          text: 'words'
+        }, {
+          highlight: false,
+          text: '</ etk >'
+        }]);
+
+        expect(element._getPhrases({
+          text: 'etk words /etk'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: false,
+          text: 'etk words /etk'
+        }]);
+
+        expect(element._getPhrases({
+          text: '<etk>'
+        }, 'text', 'etk')).to.deep.equal([]);
+
+        expect(element._getPhrases({
+          text: '</etk>'
+        }, 'text', 'etk')).to.deep.equal([]);
+
+        expect(element._getPhrases({
+          text: '<etk>one</etk> and <etk>two</etk>'
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: true,
+          text: 'one'
+        }, {
+          highlight: false,
+          text: 'and'
+        }, {
+          highlight: true,
+          text: 'two'
+        }]);
+
+        expect(element._getPhrases({
+          text: ' start and <etk>one</etk> and <etk> </etk> end '
+        }, 'text', 'etk')).to.deep.equal([{
+          highlight: false,
+          text: 'start and'
+        }, {
+          highlight: true,
+          text: 'one'
+        }, {
+          highlight: false,
+          text: 'and'
+        }, {
+          highlight: false,
+          text: 'end'
+        }]);
+
+        expect(element._getPhrases({
+          property: '<tag>words</tag>'
+        }, 'property', 'tag')).to.deep.equal([{
+          highlight: true,
+          text: 'words'
+        }]);
+      });
+
+      test('open does open the dialog', function(done) {
+        var dialog = element.$$('#confidenceDialog');
+        expect(dialog.opened).to.be.false;
+        element.open();
+        flush(function() {
+          expect(dialog.opened).to.be.true;
+          done();
+        });
+      });
+
+      test('setting provenances does create provenance and phrase elements', function(done) {
+        expect(element.$$('.phrase')).to.not.exist;
+
+        element.provenances = [{
+          method: 'method1',
+          text: 'text1'
+        }, {
+          method: 'method2',
+          text: 'text2 <etk>text3</etk> text4'
+        }];
+
+        flush(function() {
+          var names = Polymer.dom(element.root).querySelectorAll('.styled-dialog-name');
+          expect(names.length).to.equal(6);
+          expect(names[0].innerHTML).to.equal('Confidence');
+          expect(names[1].innerHTML).to.equal('Document ID');
+          expect(names[2].innerHTML).to.equal('Text');
+          expect(names[3].innerHTML).to.equal('Method');
+          expect(names[4].innerHTML).to.equal('Text');
+          expect(names[5].innerHTML).to.equal('Method');
+          var phrases = Polymer.dom(element.root).querySelectorAll('.phrase');
+          expect(phrases.length).to.equal(4);
+          expect(phrases[0].innerHTML.indexOf('text1') >= 0).to.be.true;
+          expect(phrases[1].innerHTML.indexOf('text2') >= 0).to.be.true;
+          expect(phrases[2].innerHTML.indexOf('text3') >= 0).to.be.true;
+          expect(phrases[3].innerHTML.indexOf('text4') >= 0).to.be.true;
+          expect(phrases[2].innerHTML.indexOf('class="highlighted"') >= 0).to.be.true;
+          done();
+        });
+      });
+    });
+  </script>
+</body>
+</html>

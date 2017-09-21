@@ -40,176 +40,15 @@ limitations under the License.
 
       test('properties are set as expected', function() {
         expect(element.confidence).to.equal('0');
-        expect(element.documentId).to.equal('Not Available');
-        expect(element.provenances).to.deep.equal([]);
-        expect(element.provenanceMethodProperty).to.equal('method');
-        expect(element.provenanceTextProperty).to.equal('text');
-        expect(element.highlightTag).to.equal('etk');
+        expect(element.selected).to.be.false;
       });
 
-      test('_getProperty does return as expected', function() {
-        expect(element._getProperty).to.be.a('Function');
-        expect(element._getProperty({}, 'property')).to.be.undefined;
-        expect(element._getProperty({method: 'correctMethod'},'method')).to.equal('correctMethod');
+      test('does have confidence elements', function() {
+        expect(element.$$('span.confidence.left')).to.exist;
+        expect(element.$$('span.confidence.right')).to.exist;
       });
 
-      test('_toggleProvenanceDialog does open the dialog', function(done) {
-        var dialog = element.$$('#provenanceDialog');
-        expect(dialog.opened).to.be.false;
-        element._toggleProvenanceDialog();
-        flush(function() {
-          expect(dialog.opened).to.be.true;
-          done();
-        });
-      });
-
-      test('_getPhrases does return as expected', function() {
-        expect(element._getPhrases).to.be.a('Function');
-        expect(element._getPhrases({}, 'text', 'etk')).to.deep.equal([{
-          highlight: false,
-          text: 'Not Available'
-        }]);
-
-        expect(element._getPhrases({
-          text: 'words'
-        }, 'text', 'etk')).to.deep.equal([{
-          highlight: false,
-          text: 'words'
-        }]);
-
-        expect(element._getPhrases({
-          text: '<etk>words</etk>'
-        }, 'text', 'etk')).to.deep.equal([{
-          highlight: true,
-          text: 'words'
-        }]);
-
-        expect(element._getPhrases({
-          text: 'start left <etk>inner words</etk> right end'
-        }, 'text', 'etk')).to.deep.equal([{
-          highlight: false,
-          text: 'start left'
-        }, {
-          highlight: true,
-          text: 'inner words'
-        }, {
-          highlight: false,
-          text: 'right end'
-        }]);
-
-        expect(element._getPhrases({
-          text: '<etk key="value">words</etk>'
-        }, 'text', 'etk')).to.deep.equal([{
-          highlight: true,
-          text: 'words'
-        }]);
-
-        expect(element._getPhrases({
-          text: '<etk>a < b > c</etk>'
-        }, 'text', 'etk')).to.deep.equal([{
-          highlight: true,
-          text: 'a < b > c'
-        }]);
-
-        expect(element._getPhrases({
-          text: '<etk>a > b < c</etk>'
-        }, 'text', 'etk')).to.deep.equal([{
-          highlight: true,
-          text: 'a > b < c'
-        }]);
-
-        expect(element._getPhrases({
-          text: 'a < b > c <etk>words</etk> x < y > z'
-        }, 'text', 'etk')).to.deep.equal([{
-          highlight: false,
-          text: 'a < b > c'
-        }, {
-          highlight: true,
-          text: 'words'
-        }, {
-          highlight: false,
-          text: 'x < y > z'
-        }]);
-
-        expect(element._getPhrases({
-          text: 'a > b < c <etk>words</etk> x > y < z'
-        }, 'text', 'etk')).to.deep.equal([{
-          highlight: false,
-          text: 'a > b < c'
-        }, {
-          highlight: true,
-          text: 'words'
-        }, {
-          highlight: false,
-          text: 'x > y < z'
-        }]);
-
-        expect(element._getPhrases({
-          text: '< etk > <etk>words</etk> </ etk >'
-        }, 'text', 'etk')).to.deep.equal([{
-          highlight: false,
-          text: '< etk >'
-        }, {
-          highlight: true,
-          text: 'words'
-        }, {
-          highlight: false,
-          text: '</ etk >'
-        }]);
-
-        expect(element._getPhrases({
-          text: 'etk words /etk'
-        }, 'text', 'etk')).to.deep.equal([{
-          highlight: false,
-          text: 'etk words /etk'
-        }]);
-
-        expect(element._getPhrases({
-          text: '<etk>'
-        }, 'text', 'etk')).to.deep.equal([]);
-
-        expect(element._getPhrases({
-          text: '</etk>'
-        }, 'text', 'etk')).to.deep.equal([]);
-
-        expect(element._getPhrases({
-          text: '<etk>one</etk> and <etk>two</etk>'
-        }, 'text', 'etk')).to.deep.equal([{
-          highlight: true,
-          text: 'one'
-        }, {
-          highlight: false,
-          text: 'and'
-        }, {
-          highlight: true,
-          text: 'two'
-        }]);
-
-        expect(element._getPhrases({
-          text: ' start and <etk>one</etk> and <etk> </etk> end '
-        }, 'text', 'etk')).to.deep.equal([{
-          highlight: false,
-          text: 'start and'
-        }, {
-          highlight: true,
-          text: 'one'
-        }, {
-          highlight: false,
-          text: 'and'
-        }, {
-          highlight: false,
-          text: 'end'
-        }]);
-
-        expect(element._getPhrases({
-          property: '<tag>words</tag>'
-        }, 'property', 'tag')).to.deep.equal([{
-          highlight: true,
-          text: 'words'
-        }]);
-      });
-
-      test('_getConfidenceStyleClass does return as expected', function() {
+      test('_getConfidenceStyleClass given a string does return as expected', function() {
         expect(element._getConfidenceStyleClass).to.be.a('Function');
         expect(element._getConfidenceStyleClass('')).to.equal('hide');
         expect(element._getConfidenceStyleClass('0')).to.equal('level0');
@@ -223,6 +62,10 @@ limitations under the License.
         expect(element._getConfidenceStyleClass('90')).to.equal('level4');
         expect(element._getConfidenceStyleClass('91')).to.equal('level5');
         expect(element._getConfidenceStyleClass('100')).to.equal('level5');
+      });
+
+      test('_getConfidenceStyleClass given a number does return as expected', function() {
+        expect(element._getConfidenceStyleClass).to.be.a('Function');
         expect(element._getConfidenceStyleClass(-1)).to.equal('hide');
         expect(element._getConfidenceStyleClass(0)).to.equal('level0');
         expect(element._getConfidenceStyleClass(1)).to.equal('level1');
@@ -243,6 +86,21 @@ limitations under the License.
         expect(element._getTitle('25')).to.equal('Confidence:  25% (Click to See Provenance)');
         expect(element._getTitle('50')).to.equal('Confidence:  50% (Click to See Provenance)');
         expect(element._getTitle('100')).to.equal('Confidence:  100% (Click to See Provenance)');
+      });
+
+      test('_select does work as expected', function(done) {
+        var call = 0;
+        element.changeListener = function() {
+          if(++call === 1) {
+            expect(element.selected).to.be.true;
+          } else {
+            expect(element.selected).to.be.false;
+            done();
+          }
+        };
+
+        element.listen(element, 'selected-changed', 'changeListener');
+        element._select();
       });
     });
   </script>
