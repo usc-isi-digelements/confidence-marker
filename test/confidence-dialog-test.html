@@ -50,7 +50,7 @@ limitations under the License.
       test('does have dialog element', function() {
         expect(element.$$('styled-dialog')).to.exist;
         expect(element.$$('styled-dialog').id).to.equal('confidenceDialog');
-        expect(element.$$('styled-dialog').header).to.equal('Extraction Data Provenance');
+        expect(element.$$('styled-dialog').header).to.equal('Extraction Evidence');
         expect(element.$$('styled-dialog').fill).to.be.false;
         expect(element.$$('styled-dialog').modal).to.be.false;
         expect(element.$$('styled-dialog').opened).to.be.false;
@@ -251,7 +251,6 @@ limitations under the License.
           expect(phrases[1].innerHTML.indexOf('text2') >= 0).to.be.true;
           expect(phrases[2].innerHTML.indexOf('text3') >= 0).to.be.true;
           expect(phrases[3].innerHTML.indexOf('text4') >= 0).to.be.true;
-          expect(phrases[2].innerHTML.indexOf('class="highlighted"') >= 0).to.be.true;
           done();
         });
       });

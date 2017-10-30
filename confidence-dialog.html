@@ -51,7 +51,7 @@ var provenances = [{
     <style>
       .highlighted {
         background-color: yellow;
-        border-radius: 5px;
+        border-radius: 2px;
         font-weight: 500;
         padding: 5px;
       }
@@ -62,7 +62,7 @@ var provenances = [{
       }
     </style>
 
-    <styled-dialog id="confidenceDialog" header="Extraction Data Provenance">
+    <styled-dialog id="confidenceDialog" header="Extraction Evidence">
       <div class="layout horizontal center">
         <span class="styled-dialog-name">Confidence</span>
         [[confidence]] %
@@ -74,7 +74,7 @@ var provenances = [{
       </div>
 
       <template is="dom-if" if="[[!provenances]]">
-        <div>Extraction Data Provenance Not Available</div>
+        <div>Extraction Evidence Not Available</div>
       </template>
 
       <template is="dom-repeat" items="[[provenances]]">
