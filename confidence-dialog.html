@@ -60,45 +60,73 @@ var provenances = [{
         /* Set the width to fit the "Document ID" text plus margin. */
         min-width: 105px;
       }
+
+      .well {
+        background-color: rgba(0,0,0,0.05);
+        padding: 10px;
+      }
+
+      .well .method {
+        margin-top: 10px;
+      }
+
+      .well .styled-dialog-name {
+        /* Set the width to fit the "Method" text plus margin. */
+        min-width: 70px;
+      }
     </style>
 
     <styled-dialog id="confidenceDialog" header="Extraction Evidence">
-      <div class="layout horizontal center">
-        <span class="styled-dialog-name">Confidence</span>
-        [[confidence]] %
-      </div>
+      <template is="dom-repeat" items="[[data]]">
+        <div class="layout horizontal center">
+          <span class="styled-dialog-name">Extraction</span>
+          <span class="styled-dialog-text">[[_getProperty(item, nameProperty, 'Not Available')]]</span>
+        </div>
 
-      <div class="layout horizontal center">
-        <span class="styled-dialog-name">Document ID</span>
-        [[documentId]]
-      </div>
+        <div class="layout horizontal center">
+          <span class="styled-dialog-name">Confidence</span>
+          <span class="styled-dialog-text">[[_getProperty(item, confidenceProperty, 'Not Available')]] %</span>
+        </div>
 
-      <template is="dom-if" if="[[!provenances]]">
-        <div>Extraction Evidence Not Available</div>
-      </template>
+        <div class="layout horizontal center">
+          <span class="styled-dialog-name">Document ID</span>
+          <span class="styled-dialog-text">[[_getProperty(item, idProperty, 'Not Available')]]</span>
+        </div>
 
-      <template is="dom-repeat" items="[[provenances]]">
-        <div class="styled-dialog-divider"></div>
-        <div class="layout horizontal center wrap">
-          <span class="styled-dialog-name">Text</span>
-          <template is="dom-repeat" items="[[_getPhrases(item, provenanceTextProperty, highlightTag)]]">
-            <span class="phrase styled-dialog-right-space">
-              <template is="dom-if" if="[[item.highlight]]">
-                <span class="highlighted">[[item.text]]</span>
+        <div class="well">
+          <template is="dom-if" if="[[!_getListOrNull(item, provenanceProperty)]]">
+            <span class="styled-dialog-text">Extraction Evidence Not Available</span>
+          </template>
+
+          <template is="dom-repeat" items="[[_getList(item, provenanceProperty)]]" as="provenance">
+            <template is="dom-if" if="[[index]]">
+              <div class="styled-dialog-divider"></div>
+            </template>
+
+            <div class="layout horizontal center wrap">
+              <span class="styled-dialog-name">Text</span>
+              <template is="dom-repeat" items="[[_getPhrases(provenance, provenanceTextProperty, highlightTag)]]" as="phrase">
+                <span class="phrase styled-dialog-right-space">
+                  <template is="dom-if" if="[[phrase.highlight]]">
+                    <span class="highlighted">[[phrase.text]]</span>
+                  </template>
+                  <template is="dom-if" if="[[!phrase.highlight]]">
+                    <span>[[phrase.text]]</span>
+                  </template>
+                </span>
               </template>
-              <template is="dom-if" if="[[!item.highlight]]">
-                [[item.text]]
-              </template>
-            </span>
+            </div>
+
+            <template is="dom-if" if="[[_getProperty(provenance, provenanceMethodProperty)]]">
+              <div class="layout horizontal center method">
+                <span class="styled-dialog-name">Method</span>
+                <span class="styled-dialog-text">[[_getProperty(provenance, provenanceMethodProperty)]]</span>
+              </div>
+            </template>
           </template>
         </div>
 
-        <template is="dom-if" if="[[_getProperty(item, provenanceMethodProperty)]]">
-          <div class="layout horizontal center">
-            <span class="styled-dialog-name">Method</span>
-            [[_getProperty(item, provenanceMethodProperty)]]
-          </div>
-        </template>
+        <div class="styled-dialog-divider"></div>
       </template>
     </styled-dialog>
   </template>
@@ -113,48 +141,70 @@ var provenances = [{
         /**
          * (Required)
          *
-         * The confidence.
-         *
-         * @type {Number|String}
-         * @default 'Not Available'
-         */
-        confidence: {
-          type: String,
-          value: 'Not Available'
-        },
-
-        /**
-         * (Optional)
-         *
-         * The document ID.
+         * The property in each data object containing the confidence number or string.
          *
          * @type {String}
-         * @default 'Not Available'
+         * @default 'confidence'
          */
-        documentId: {
+        confidenceProperty: {
           type: String,
-          value: 'Not Available'
+          value: 'confidence'
+        },
+
+        /**
+         * (Required)
+         *
+         * The data list.
+         *
+         * @type {Array}
+         */
+        data: {
+          type: Array
         },
 
         /**
          * (Optional)
          *
-         * The list of extraction provenance objects.
+         * The property in each data object containing the document ID.
          *
-         * @type {Array}
-         * @default []
+         * @type {String}
+         * @default 'documentId'
          */
-        provenances: {
+        idProperty: {
           type: String,
-          value: function() {
-            return [];
-          }
+          value: 'documentId'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The property in each data object containing the extraction name.
+         *
+         * @type {String}
+         * @default 'extraction'
+         */
+        nameProperty: {
+          type: String,
+          value: 'extraction'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The property in each data object containing the list of extraction provenance objects.
+         *
+         * @type {String}
+         * @default 'provenances'
+         */
+        provenanceProperty: {
+          type: String,
+          value: 'provenances'
         },
 
         /**
          * (Optional) 
          *
-         * The property of the method in the provenance objects.
+         * The property in each provenance object containing the method.
          *
          * @type {String}
          * @default 'method'
@@ -167,7 +217,7 @@ var provenances = [{
         /**
          * (Optional) 
          *
-         * The property of the text in the provenance objects.
+         * The property in each provenance object containing the text.
          *
          * @type {String}
          * @default 'text'
@@ -246,15 +296,40 @@ var provenances = [{
       },
 
       /**
+       * Returns the list in the given item at the given property or an empty array.
+       *
+       * @param {Object} item
+       * @param {String} property
+       * @return {Array}
+       * @private
+       */
+      _getList: function(item, property) {
+        return item[property] || [];
+      },
+
+      /**
+       * Returns the list in the given item at the given property or null if an empty array.
+       *
+       * @param {Object} item
+       * @param {String} property
+       * @return {Array|null}
+       * @private
+       */
+      _getListOrNull: function(item, property) {
+        return item[property] && item[property].length ? item[property] : null;
+      },
+
+      /**
        * Returns the object in the given item at the given property.
        *
        * @param {Object} item
-       * @param {Array} property
+       * @param {String} property
+       * @param {Object} defaultValue
        * @return {Object}
        * @private
        */
-      _getProperty: function(item, property) {
-        return item[property];
+      _getProperty: function(item, property, defaultValue) {
+        return item[property] || defaultValue;
       },
 
       /**

@@ -82,10 +82,10 @@ limitations under the License.
 
       test('_getTitle does return as expected', function() {
         expect(element._getTitle).to.be.a('Function');
-        expect(element._getTitle('0')).to.equal('Click to Open Extraction Evidence (Confidence:  0%');
-        expect(element._getTitle('25')).to.equal('Click to Open Extraction Evidence (Confidence:  25%');
-        expect(element._getTitle('50')).to.equal('Click to Open Extraction Evidence (Confidence:  50%');
-        expect(element._getTitle('100')).to.equal('Click to Open Extraction Evidence (Confidence:  100%');
+        expect(element._getTitle('0')).to.equal('Click to Open Extraction Evidence (Confidence:  0%)');
+        expect(element._getTitle('25')).to.equal('Click to Open Extraction Evidence (Confidence:  25%)');
+        expect(element._getTitle('50')).to.equal('Click to Open Extraction Evidence (Confidence:  50%)');
+        expect(element._getTitle('100')).to.equal('Click to Open Extraction Evidence (Confidence:  100%)');
       });
 
       test('_select does work as expected', function(done) {

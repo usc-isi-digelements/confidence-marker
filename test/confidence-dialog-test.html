@@ -39,9 +39,10 @@ limitations under the License.
       });
 
       test('properties are set as expected', function() {
-        expect(element.confidence).to.equal('Not Available');
-        expect(element.documentId).to.equal('Not Available');
-        expect(element.provenances).to.deep.equal([]);
+        expect(element.confidenceProperty).to.equal('confidence');
+        expect(element.idProperty).to.equal('documentId');
+        expect(element.nameProperty).to.equal('extraction');
+        expect(element.provenanceProperty).to.deep.equal('provenances');
         expect(element.provenanceMethodProperty).to.equal('method');
         expect(element.provenanceTextProperty).to.equal('text');
         expect(element.highlightTag).to.equal('etk');
@@ -56,17 +57,57 @@ limitations under the License.
         expect(element.$$('styled-dialog').opened).to.be.false;
 
         var names = Polymer.dom(element.root).querySelectorAll('.styled-dialog-name');
-        expect(names.length).to.equal(2);
-        expect(names[0].innerHTML).to.equal('Confidence');
-        expect(names[1].innerHTML).to.equal('Document ID');
+        expect(names.length).to.equal(0);
+        var texts = Polymer.dom(element.root).querySelectorAll('.styled-dialog-text');
+        expect(texts.length).to.equal(0);
+        var phrases = Polymer.dom(element.root).querySelectorAll('.phrase span');
+        expect(phrases.length).to.equal(0);
+      });
+
+      test('_getList does return as expected', function() {
+        expect(element._getList).to.be.a('Function');
+        expect(element._getList({}, 'property')).to.deep.equal([]);
+        expect(element._getList({
+          other: ['value']
+        }, 'key')).to.deep.equal([]);
+        expect(element._getList({
+          key: ['value']
+        }, 'key')).to.deep.equal(['value']);
+        expect(element._getList({
+          key: ['value', 'value', 'value']
+        }, 'key')).to.deep.equal(['value', 'value', 'value']);
+      });
+
+      test('_getListOrNull does return as expected', function() {
+        expect(element._getListOrNull).to.be.a('Function');
+        expect(element._getListOrNull({}, 'property')).to.be.null;
+        expect(element._getListOrNull({
+          other: ['value']
+        }, 'key')).to.be.null;
+        expect(element._getListOrNull({
+          key: {}
+        }, 'key')).to.be.null;
+        expect(element._getListOrNull({
+          key: []
+        }, 'key')).to.be.null;
+        expect(element._getListOrNull({
+          key: ['value']
+        }, 'key')).to.deep.equal(['value']);
+        expect(element._getListOrNull({
+          key: ['value', 'value', 'value']
+        }, 'key')).to.deep.equal(['value', 'value', 'value']);
       });
 
       test('_getProperty does return as expected', function() {
         expect(element._getProperty).to.be.a('Function');
         expect(element._getProperty({}, 'property')).to.be.undefined;
         expect(element._getProperty({
+          other: 'value'
+        }, 'key')).to.be.undefined;
+        expect(element._getProperty({
           key: 'value'
         }, 'key')).to.equal('value');
+        expect(element._getProperty({}, 'property', 'Not Available')).to.equal('Not Available');
       });
 
       test('_getPhrases does return as expected', function() {
@@ -228,29 +269,79 @@ limitations under the License.
       test('setting provenances does create provenance and phrase elements', function(done) {
         expect(element.$$('.phrase')).to.not.exist;
 
-        element.provenances = [{
-          method: 'method1',
-          text: 'text1'
+        element.data = [{
+          confidence: 1,
+          documentId: 'id1',
+          extraction: 'extraction1',
+          provenances: [{
+            method: 'methodA',
+            text: 'textA1'
+          }, {
+            method: 'methodB',
+            text: 'textB1 <etk>textB2</etk> textB3'
+          }]
         }, {
-          method: 'method2',
-          text: 'text2 <etk>text3</etk> text4'
+          confidence: 2,
+          documentId: 'id2',
+          extraction: 'extraction2',
+          provenances: [{
+            method: 'methodC',
+            text: 'textC1'
+          }, {
+            method: 'methodD',
+            text: 'textD1 <etk>textD2</etk> textD3'
+          }]
         }];
 
         flush(function() {
           var names = Polymer.dom(element.root).querySelectorAll('.styled-dialog-name');
-          expect(names.length).to.equal(6);
-          expect(names[0].innerHTML).to.equal('Confidence');
-          expect(names[1].innerHTML).to.equal('Document ID');
-          expect(names[2].innerHTML).to.equal('Text');
-          expect(names[3].innerHTML).to.equal('Method');
-          expect(names[4].innerHTML).to.equal('Text');
-          expect(names[5].innerHTML).to.equal('Method');
-          var phrases = Polymer.dom(element.root).querySelectorAll('.phrase');
-          expect(phrases.length).to.equal(4);
-          expect(phrases[0].innerHTML.indexOf('text1') >= 0).to.be.true;
-          expect(phrases[1].innerHTML.indexOf('text2') >= 0).to.be.true;
-          expect(phrases[2].innerHTML.indexOf('text3') >= 0).to.be.true;
-          expect(phrases[3].innerHTML.indexOf('text4') >= 0).to.be.true;
+          expect(names.length).to.equal(14);
+          expect(names[0].innerHTML).to.equal('Extraction');
+          expect(names[1].innerHTML).to.equal('Confidence');
+          expect(names[2].innerHTML).to.equal('Document ID');
+          expect(names[3].innerHTML).to.equal('Text');
+          expect(names[4].innerHTML).to.equal('Method');
+          expect(names[5].innerHTML).to.equal('Text');
+          expect(names[6].innerHTML).to.equal('Method');
+          expect(names[7].innerHTML).to.equal('Extraction');
+          expect(names[8].innerHTML).to.equal('Confidence');
+          expect(names[9].innerHTML).to.equal('Document ID');
+          expect(names[10].innerHTML).to.equal('Text');
+          expect(names[11].innerHTML).to.equal('Method');
+          expect(names[12].innerHTML).to.equal('Text');
+          expect(names[13].innerHTML).to.equal('Method');
+
+          var texts = Polymer.dom(element.root).querySelectorAll('.styled-dialog-text');
+          expect(texts.length).to.equal(10);
+          expect(texts[0].innerHTML).to.equal('extraction1');
+          expect(texts[1].innerHTML).to.equal('1 %');
+          expect(texts[2].innerHTML).to.equal('id1');
+          expect(texts[3].innerHTML).to.equal('methodA');
+          expect(texts[4].innerHTML).to.equal('methodB');
+          expect(texts[5].innerHTML).to.equal('extraction2');
+          expect(texts[6].innerHTML).to.equal('2 %');
+          expect(texts[7].innerHTML).to.equal('id2');
+          expect(texts[8].innerHTML).to.equal('methodC');
+          expect(texts[9].innerHTML).to.equal('methodD');
+
+          var phrases = Polymer.dom(element.root).querySelectorAll('.phrase span');
+          expect(phrases.length).to.equal(8);
+          expect(phrases[0].innerHTML.indexOf('textA1') >= 0).to.be.true;
+          expect(phrases[0].classList.contains('highlighted')).to.be.false;
+          expect(phrases[1].innerHTML.indexOf('textB1') >= 0).to.be.true;
+          expect(phrases[1].classList.contains('highlighted')).to.be.false;
+          expect(phrases[2].innerHTML.indexOf('textB2') >= 0).to.be.true;
+          expect(phrases[2].classList.contains('highlighted')).to.be.true;
+          expect(phrases[3].innerHTML.indexOf('textB3') >= 0).to.be.true;
+          expect(phrases[3].classList.contains('highlighted')).to.be.false;
+          expect(phrases[4].innerHTML.indexOf('textC1') >= 0).to.be.true;
+          expect(phrases[4].classList.contains('highlighted')).to.be.false;
+          expect(phrases[5].innerHTML.indexOf('textD1') >= 0).to.be.true;
+          expect(phrases[5].classList.contains('highlighted')).to.be.false;
+          expect(phrases[6].innerHTML.indexOf('textD2') >= 0).to.be.true;
+          expect(phrases[6].classList.contains('highlighted')).to.be.true;
+          expect(phrases[7].innerHTML.indexOf('textD3') >= 0).to.be.true;
+          expect(phrases[7].classList.contains('highlighted')).to.be.false;
           done();
         });
       });
