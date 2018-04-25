@@ -63,11 +63,15 @@ var provenances = [{
 
       .well {
         background-color: var(--paper-grey-300);
-        padding: 10px;
+        padding: 10px 10px 0;
       }
 
-      .well .method {
-        margin-top: 10px;
+      .well > *:not(.styled-dialog-divider) {
+        padding-bottom: 10px;
+      }
+
+      .well > .styled-dialog-divider {
+        margin-bottom: 10px;
       }
 
       .well .styled-dialog-name {
@@ -118,7 +122,7 @@ var provenances = [{
             </div>
 
             <template is="dom-if" if="[[_getProperty(provenance, provenanceMethodProperty)]]">
-              <div class="layout horizontal center method">
+              <div class="layout horizontal center">
                 <span class="styled-dialog-name">Method</span>
                 <span class="styled-dialog-text">[[_getProperty(provenance, provenanceMethodProperty)]]</span>
               </div>
