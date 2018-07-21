@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "keywords": ["web-component", "polymer"],
   "main": ["confidence-marker.html", "confidence-dialog.html"],
-  "homepage": "https://github.com/DigElements/confidence-marker/",
+  "homepage": "https://github.com/usc-isi-digelements/confidence-marker/",
   "ignore": ["/.*", "/test/"],
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.2",
