@@ -2,7 +2,7 @@
   "name": "confidence-marker",
   "description":
     "Polymer Elements showing the confidence and provenance of an extraction using a marker or dialog.",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "authors": ["Next Century Corporation"],
   "license": "Apache-2.0",
   "keywords": ["web-component", "polymer"],
@@ -12,8 +12,7 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.2",
     "iron-flex-layout": "PolymerElements/iron-flex-layout#^2.0.0",
-    "styled-dialog":
-      "https://github.com/KimQ0126/styled-dialog.git#4b9ebc81823fb31a61cd69c9d4dee4d4b04ddbb8",
+    "styled-dialog": "usc-isi-digelements/styled-dialog#^2.2.2",
     "web-animations-js": "web-animations/web-animations-js#^2.2"
   },
   "devDependencies": {
